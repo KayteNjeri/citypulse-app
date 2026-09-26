@@ -3,6 +3,7 @@ import EventGrid from './components/EventGrid'
 import FeaturedBanner from './components/FeaturedBanner'
 import NavBar from './components/NavBar'
 import SearchBar from './components/SearchBar'
+import Footer from './components/Footer'
 import { mockEvents } from './data/mockEvents'
 import { getNextEvent } from './utils/nextEvent'
 import './App.css'
@@ -46,6 +47,8 @@ function App() {
         <FeaturedBanner event={nextEvent} />
         <EventGrid events={events} />
       </main>
+
+      <Footer />
     </>
   )
 }
