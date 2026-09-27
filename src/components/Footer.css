@@ -67,6 +67,22 @@
     margin: 0;
 }
 
+.footer__bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.footer__bottom-links a {
+    color: var(--text-h);
+    text-decoration: none;
+}
+
+.footer__bottom-links a:hover {
+    color: var(--text-h);
+    text-decoration: underline;
+}
+
 @media (max-width: 600px) {
     .footer__content {
         flex-direction: column;

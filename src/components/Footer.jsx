@@ -16,15 +16,19 @@ function Footer () {
                 </p>
 
                 <div className="footer__links">
-                    <a href="#about">About</a>
-                    <a href="#contacts">Contact Us</a>
-                    <a href="#privacy">Privacy</a>
+                    <a href="#about-us">About Us</a>
+                    <a href="#contact-us">Contact Us</a>
+                    <a href="#privacy-policy">Privacy Policy</a>
                 </div>
             </div>
 
             <div className="footer__bottom">
                 <p>© {new Date(). getFullYear()} CityPulse. All rights reserved.</p>
-                <p>Group 2</p>
+                
+                <div className="footer__bottom-links">
+                    <a href="#terms">Terms</a>
+                    <a href="#cookies">Cookies</a>
+                </div>
             </div>
         </footer>
     )
