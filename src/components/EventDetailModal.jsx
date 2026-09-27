@@ -2,23 +2,55 @@ import { useEffect, useRef } from 'react';
 import { formatDate, formatPrice } from '../utils/formatEvent';
 import './EventDetailModal.css';
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, select, input, [tabindex]:not([tabindex="-1"])';
+
 export default function EventDetailModal({ isOpen, onClose, event }) {
   const closeBtnRef = useRef(null);
+  const drawerRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Remember whatever had focus (the card that was clicked) so we can send
+    // focus back to it once the modal closes.
+    previouslyFocusedRef.current = document.activeElement;
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Trap Tab/Shift+Tab so focus cycles within the modal instead of
+      // leaking out into the page behind it.
+      if (e.key === 'Tab' && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll(FOCUSABLE_SELECTOR);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
 
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-      setTimeout(() => closeBtnRef.current?.focus(), 50);
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    const focusTimeout = setTimeout(() => closeBtnRef.current?.focus(), 50);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
+      clearTimeout(focusTimeout);
+      previouslyFocusedRef.current?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -38,8 +70,15 @@ export default function EventDetailModal({ isOpen, onClose, event }) {
     : null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-drawer" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal-drawer"
+        onClick={(e) => e.stopPropagation()}
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-modal-title"
+      >
         <header className="drawer-header">
           <div className="category-pill">
             <span>{category || 'Event'}</span>
@@ -58,7 +97,9 @@ export default function EventDetailModal({ isOpen, onClose, event }) {
         </div>
 
         <div className="drawer-content">
-          <h2 className="event-title">{name}</h2>
+          <h2 className="event-title" id="event-modal-title">
+            {name}
+          </h2>
 
           <div className="meta-strip">
             <p>📅 {formattedDate}</p>
