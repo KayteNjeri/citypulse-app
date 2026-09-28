@@ -1,33 +1,55 @@
-
-function DateFilterBar({ filters }) {
-    const { location, setLocation, dateFilter, setDateFilter, customDate, setCustomDate, allCities, filtered, resetFilters } = filters;
-
+import { useRef } from "react";
+import "./DateFilterBar.css";
+function DateFilterBar({ city, setCity, startDate, setStartDate, endDate, setEndDate, filtered, clearFilters, onClear }) {
+    const startRef = useRef(null)
+    const endRef = useRef(null)
+    
+    const formatNice = (iso) => {
+        if (!iso) return ""
+        const d = new Date(iso)
+        return d.toLocaleDateString('en-GB', {day: '2-digit', month:'short', year:'numeric'})
+    }
+    const openCalendar = (ref) => {
+        try{
+            ref.current?.showPicker()
+        } catch (e) {
+            ref.current?.focus()
+            ref.current?.click()
+        }
+    }
+    
     return (
         <div className="date-filter-bar">
             <div className="date-left">
-                <select id="location" value={location} onChange={(e) => setLocation(e.target.value)}>
-                    {allCities.map(city => (
-                        <option key={city} value={city}>{city === 'All' ? 'All Locations' : city}</option>
+                <div className="input-wrap">
+                    <input id="location" 
+                    type="text" 
+                    placeholder="Enter city..." 
+                    value={city} onChange={(e) => setCity(e.target.value)} />
+                </div>
+                <div className="input-wrap clickable" onClick={() => openCalendar(startRef)}>
+                    <span> 📅 </span>
+                    <input 
+                        ref={startRef}
+                        type="date" 
+                        value={startDate} onChange={(e) => setStartDate(e.target.value)}
+                        onClick={(e) => {e.stopPropagation(); openCalendar(startRef); }}
+                    />
+                    <span className="cal-label"> {startDate ? formatNice(startDate) : "pick date"} </span>
+                </div>
+                <span className="to-text">to</span>
 
-                    ))}
-                </select>
-                <select id="dateFilter" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
-                    <option value="All">All Dates</option>
-                    <option value="Today">Today</option>
-                    <option value="This Week">This Week</option>
-                    <option value="This Month">This Month</option>
-                    <option value="custom">Custom Range</option>
-                </select>
-                {dateFilter === 'custom' && (
-                    <div className="custom-date-range">
-                        <input type="date" value={customDate.start} onChange={(e) => setCustomDate({ ...customDate, start: e.target.value })} />
-                        <span>to</span>
-                        <input type="date" value={customDate.end} onChange={(e) => setCustomDate({ ...customDate, end: e.target.value })} />
-                    </div>
-                )}
+                <div className="input-wrap clickable" onClick={() => openCalendar(endRef)}>
+                    <span> 📅 </span>
+                    <input ref={endRef} type="date" value={endDate} 
+                        onChange={(e) => setEndDate(e.target.value)} 
+                        onClick={(e) => {e.stopPropagation(); openCalendar(endRef); }}
+                    />
+                    <span className="cal-label"> {endDate ? formatNice(endDate) : "End date"} </span>
+                </div>
                 <div className="date-right">
-                    <span className="count">{filtered.length} events </span>
-                    <button onClick={resetFilters} className="clear-btn">Clear</button>
+                    <span className="count">{filtered?.length || 0} events </span>
+                    <button onClick={clearFilters || onClear} className="clear-btn">Clear</button>
                 </div>
             </div>
             </div>

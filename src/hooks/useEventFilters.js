@@ -1,65 +1,45 @@
+/*
 import {useState, useEffect} from 'react';
 
 export function useEventFilters (events = []) {
-    const [search, setSearch] = useState('');
-    const [category, setCategory] = useState('All');
-    const [dateFilter, setDateFilter] = useState('All');
-    const [customDate, setCustomDate] = useState({start: '', end: ''});
-    const [location, setLocation] = useState('All');
-
-    const allCities = useMemo(() => {
-        return ['All', ...new Set(events.map(event => event.city).fillter(Boolean))];
-    }, [events]);
+    const [city, setSearch] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    
 
     const filtered = useMemo(() => {
+        if (!Array.isArray(events)) return [];
         return events.filter(event => {
-            const q = search.toLowerCase().trim();
-            const matchSearch = !q ||
-                event.name?.toLowerCase().includes(q) ||
-                event.venue?.toLowerCase().includes(q)||
-                event.city?.toLowerCase().includes(q)
-
-            const matchesCategory = category === 'All' || event.category === category;
-            const matchesLocation = location === 'All' || event.city === location;
+            const q = city.toLowerCase().trim();
+            const matchLoc = !q ||
+                (event.city || '').toLowerCase().includes(q)
 
             let matchDate = true;
-            if (dateFilter !== 'All' && event.date) {
-                if (dateFilter === 'custom' && customDate) {
-                    matchDate = event.date === customDate;
-                } else {
-                    const eventDate = new Date(event.date); eventDate.setHours(0, 0, 0, 0);
-                    const today = new Date(); today.setHours(0, 0, 0, 0);
-                    if (dateFilter === 'Today') matchDate = eventDate.getTime() === today.getTime();
-                    else if (dateFilter === 'This Week') {
-                        const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay());
-                        const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 6);
-                        matchDate = eventDate >= startOfWeek && eventDate <= endOfWeek;
-                    } else if (dateFilter === 'This Month') {
-                        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                        matchDate = eventDate >= startOfMonth && eventDate <= endOfMonth;             
-                    }
+            try {
+                if (event.date && (startDate || endDate)) {
+                    const d = new Date(event.date)
                 }
-            }
-
-            return matchSearch && matchesCategory && matchesLocation;
+                if (startDate) {
+                    const start = new Date(startDate); start.setHours(0, 0, 0, 0);
+                    if (d < start) matchDate = false;
+                }
+                if (endDate) {
+                    const end = new Date(endDate); end.setHours(23, 59, 59, 999);
+                    if (d > end) matchDate = false;
+                }
+            } catch { matchDate = true }
+            
+            return matchLoc && matchDate;
         })
-}, [events, search, category, dateFilter, customDate, location]);
-const resetFilters = () => {
-    setSearch('');
-    setCategory('All');
-    setDateFilter('All');
-    setCustomDate({start: '', end: ''});
-    setLocation('All');
+    }, [events, city, startDate, endDate]);
+
+const clearFilters = () => {
+    setCity('');
+    setStartDate('');
+    setEndDate('');
 }
 return {
-    search, setSearch,
-    category, setCategory,
-    dateFilter, setDateFilter,
-    customDate, setCustomDate,
-    location, setLocation,
-    allCities,
-    filtered,
-    resetFilters
+    city, setCity, startDate, setStartDate, endDate, setEndDate, filtered: locationDateFiltered, clearFilters
 }
 }
+*/
