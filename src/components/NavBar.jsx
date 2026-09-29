@@ -2,10 +2,10 @@ import './NavBar.css'
 //nav_sorting added for sorting by date, time and price
 // date, recent to furthest,  time, time ranges, price, price ranges.
 // d_p_t is date, price and time\
-import { dates_data, nearest_date } from '../utils/nearestDate.js'
-import EventCard from './EventCard.jsx'
+import { morning_events, afternoon_events, evening_events } from '../utils/eventTiming'
 
-function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChange, onDatesChanges, onTimeChanges, onPriceChanges, prices, timing  }) {
+
+function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChange, nearest_furthest_date, onPriceChanges, morning, afternoon, evening }) {
   
   return (
     <header className="nav">
@@ -38,19 +38,33 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
           Filter by d_p_t
         </label>
         <select
-          id="sorting_d_p_t"
+          id="sorting_date"
+          onChange={nearest_furthest_date}
         >
-          <option value="selector">Filter By</option>
-          <option value = "nearest_date" onChange={(e) => onDatesChanges(e === true)}>Date: Nearest to Furthest</option>
-          <option value = "furthest_date">Date: Furthest to Nearest</option>
+          <option value="selector" >Filter By Date</option> 
+          <option value = "nearest_date">Date: Nearest to Furthest</option>
+          <option value = "furthest_date" >Date: Furthest to Nearest</option>
+        </select>
+        
+        <select
+          id="sorting_price"
+          onChange={onPriceChanges}
+          >
+            <option>Filter By Price</option>
+            <option value="low_to_high">Lowest to Highest</option>
+            <option value = "high_to_low">Highest to Lowest</option>
+            
         </select>
 
-      </div>
 
-       <a href='' value = "morning_events" className='morning_href'>Morning Events</a>
-        <a href='' value = "afternoon_events" className='afternoon_href'>Afternoon Events</a>
-        <a href='' value = "evening_events"className='evening_href'>Evening Event</a>
+      </div>
+      
+       <button value = "morning_events" onClick={morning} className='morning_btn'>Morning Events</button>
+        <button value = "afternoon_events" className='afternoon_href'>Afternoon Events</button>
+        <button value = "evening_events"className='evening_href'>Evening Event</button>
         //events need to be formatted
+
+
 
       <nav className="nav__profile" aria-label="Account">
         {user ? (
