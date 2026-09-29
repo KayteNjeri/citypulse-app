@@ -1,3 +1,5 @@
+import EventDetailModal from '/.components/EventDetailModal'
+
 import { useState } from 'react'
 import EventGrid from './components/EventGrid'
 import FeaturedBanner from './components/FeaturedBanner'
@@ -24,6 +26,18 @@ function App() {
   const [city, setCity] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [isModalOpen, setisModalOpen] = useState(false)
+
+  const handleOpenModal = (event) => {
+    setSelectedEvent(event)
+    setisModalOpen(true)
+  }
+  const handleCloseModal = () => {
+    setisModalOpen(true)
+    setSelectedEvent(null)
+  }
 
   // TODO: replace mockEvents with Ticketmaster results (map through normalizeEvent),
   // passing `query` as the API keyword instead of filtering locally.
@@ -74,9 +88,14 @@ function App() {
         city={city} setCity={setCity} 
         startDate={startDate} setStartDate={setStartDate} 
         endDate={endDate} setEndDate={setEndDate} filtered={events} clearFilters={clearFilters} />
-        <FeaturedBanner event={nextEvent} />
-        <EventGrid events={events} />
+        <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
+        <EventGrid events={events} onEventClick={handleOpenModal}/>
       </main>
+      <EventDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        event={selectedEvent}
+      />
     </>
   )
 }
