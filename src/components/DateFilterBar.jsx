@@ -49,7 +49,7 @@ function DateFilterBar({ city, setCity, startDate, setStartDate, endDate, setEnd
                 </div>
                 <div className="date-right">
                     <span className="count">{filtered?.length || 0} events </span>
-                    <button onClick={clearFilters || onClear} className="clear-btn">Clear</button>
+                    <button onClick={clearFilters || onClear} className="clear-button">Clear</button>
                 </div>
             </div>
             </div>

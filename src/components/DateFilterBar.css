@@ -68,23 +68,36 @@
     align-items: center;
     gap: 10px;
 }
-.count{
-    background: rgba(255, 255, 255, 0.1);
-    color: #ccc;
-    padding: 6px 12px;
-    border-radius: 20px;
+.count, .clear-button {
+    height: 36px;
+    padding: 0 18px;
+    border-radius: 999px;
     font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
 }
-.clear-btn {
-    padding: 6px 14px;
-    background-color:rgba(255, 80, 80, 0.15);
-    border: 1px solid rgba(255, 80, 80, 0.3);
-    border-radius: 8px;
+.count{
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    backdrop-filter: blur(6px);
+}
+.clear-button {
+    background:rgba(59, 130, 246, 0.25);
+    color: #bfdbfe;
     cursor: pointer;
     font-weight: bold;
 }
-.clear-btn:hover {
-    background-color: rgba(255, 80, 80, 0.25);
+.clear-button:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-1px);
+}
+.clear-button:active {
+    transform: translateY(0);
 }
 @media (max-width: 640px) {
     .date-filter-bar {
