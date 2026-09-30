@@ -4,6 +4,7 @@ import FeaturedBanner from './components/FeaturedBanner'
 import NavBar from './components/NavBar'
 import SearchBar from './components/SearchBar'
 import Footer from './components/Footer'
+import EventDetailModal from './components/EventDetailModal'
 import { mockEvents } from './data/mockEvents'
 import { getNextEvent } from './utils/nextEvent'
 import './App.css'
@@ -21,6 +22,20 @@ function App() {
   const [category, setCategory] = useState('all')
   // TODO: replace with real authentication once the auth flow exists.
   const [user, setUser] = useState(null)
+
+  // Role 4: Event Detail Modal state management
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleOpenModal = (event) => {
+    setSelectedEvent(event)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedEvent(null)
+  }
 
   // TODO: replace mockEvents with Ticketmaster results (map through normalizeEvent),
   // passing `query` as the API keyword instead of filtering locally.
@@ -44,11 +59,19 @@ function App() {
       <main className="app">
         <h1 className="visually-hidden">Group2 events</h1>
         <SearchBar value={query} onChange={setQuery} />
-        <FeaturedBanner event={nextEvent} />
-        <EventGrid events={events} />
+        <FeaturedBanner event={nextEvent} onSelect={handleOpenModal} />
+        
+        {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
+        <EventGrid events={events} onEventClick={handleOpenModal} />
       </main>
 
       <Footer />
+      {/* Role 4 Drawer Component */}
+      <EventDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        event={selectedEvent}
+      />
     </>
   )
 }
