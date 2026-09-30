@@ -42,7 +42,7 @@ const { events: apiEvents, loading: apiLoading, error: apiError, fetchEvents } =
 
   useEffect(() => {
     fetchEvents({})
-  }, [])
+  }, [fetchEvents])
 
   //Temporary test
   // useEffect(() => {
@@ -135,7 +135,12 @@ const { events: apiEvents, loading: apiLoading, error: apiError, fetchEvents } =
           startDate={startDate} setStartDate={setStartDate} 
           endDate={endDate} setEndDate={setEndDate} filtered={events} clearFilters={clearFilters} />
         <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
-        <EventGrid events={events} onEventClick={handleOpenModal}/>
+        {apiError && (
+          <p className="app__notice" role="status">
+            {apiError}
+          </p>
+        )}
+        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal}/>
         
         {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
       </main>
