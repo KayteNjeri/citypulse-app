@@ -5,9 +5,7 @@ import NavBar from './components/NavBar'
 import SearchBar from './components/SearchBar'
 import { mockEvents } from './data/mockEvents.js'
 import { getNextEvent } from './utils/nextEvent'
-import { nearest_date } from './utils/nearestDate'
 import { morning_events, afternoon_events, evening_events } from './utils/eventTiming.js'
-import EventCard from './components/EventCard.jsx'
 import './App.css'
 
 
