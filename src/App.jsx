@@ -80,8 +80,6 @@ const price_changes = () => {setPrice(!price); if (!price){
 
   //nearest date has to be selected first for furthest date to show from the furthest instead of nearest.
   
-  const toggle_timings = []
-  const prices = []
 
   const nextEvent = getNextEvent(mockEvents)
   const events = mockEvents.filter(
