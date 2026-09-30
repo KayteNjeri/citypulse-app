@@ -1,12 +1,14 @@
+import { Link } from 'react-router-dom'
 import './NavBar.css'
 
 function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChange }) {
   return (
     <header className="nav">
-      <a className="nav__brand" href="/">
+
+      <Link className="nav__brand" to="/">
         <span className="nav__logo" aria-hidden="true">●</span>
         Group2
-      </a>
+      </Link>
 
       <div className="nav__filter">
         <label htmlFor="category-filter" className="visually-hidden">
@@ -35,6 +37,7 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
               </span>
               <span className="nav__name">{user.name}</span>
             </a>
+
             <button type="button" className="nav__button" onClick={onLogout}>
               Log out
             </button>
