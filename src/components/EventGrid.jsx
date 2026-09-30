@@ -14,7 +14,7 @@ function SkeletonCard() {
   )
 }
 
-function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick }) {
+function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick}) {
   if (error) {
     return (
       <p className="event-grid__status" role="alert">
@@ -43,9 +43,10 @@ function EventGrid({ events = [], loading = false, error = null, skeletonCount =
         <li key={event.id}>
           <EventCard event={event} onSelect={onEventClick} />
         </li>
-      ))}
+      ))} 
     </ul>
   )
+
 }
 
 export default EventGrid

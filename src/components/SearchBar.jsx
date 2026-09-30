@@ -17,6 +17,7 @@ function SearchBar({ value, onChange, placeholder = 'Search events, venues or ca
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete="off"
+        //add eventlistener for enter button to save props values in searchbar
       />
     </form>
   )
