@@ -45,10 +45,6 @@ function App() {
   
 
 
-  // TODO: replace mockEvents with Ticketmaster results (map through normalizeEvent),
-  // passing `query` as the API keyword instead of filtering locally.
-  const categories = [...new Set(mockEvents.map((e) => e.category).filter(Boolean))].sort()
-
   //will complete
     function mornings(){
       
@@ -91,10 +87,10 @@ const price_changes = () => {setPrice(!price); if (!price){
 
   const categories = [...new Set(apiEvents.map((e) => e.category).filter(Boolean))].sort()
   const nextEvent = getNextEvent(apiEvents)
-  const events = apiEvents.filter(
-    (event) =>
-      matchesQuery(event, query) && (category === 'all' || event.category === category),
-  )
+  //const events = apiEvents.filter(
+    //(event) =>
+      //matchesQuery(event, query) && (category === 'all' || event.category === category),
+  //)
   const clearFilters = () => {
     setCity('')
     setStartDate('')
