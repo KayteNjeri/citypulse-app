@@ -14,7 +14,7 @@ function SkeletonCard() {
   )
 }
 
-function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6}) {
+function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick}) {
   if (error) {
     return (
       <p className="event-grid__status" role="alert">
@@ -37,12 +37,11 @@ function EventGrid({ events = [], loading = false, error = null, skeletonCount =
     return <p className="event-grid__status">No events found. Try a different search.</p>
   }
 
-
-return (
+  return (
     <ul className="event-grid">
       {events.map((event) => (
         <li key={event.id}>
-          <EventCard event={event} />
+          <EventCard event={event} onSelect={onEventClick} />
         </li>
       ))} 
     </ul>
