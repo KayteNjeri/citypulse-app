@@ -15,7 +15,7 @@ export const mockEvents = [
     category: 'Music',
     priceMin: 2500,
     priceMax: 4000,
-    currency: 'KES',
+    currency: 'KES'
   },
   {
     id: 'mock-2',
@@ -29,7 +29,7 @@ export const mockEvents = [
     category: 'Sports',
     priceMin: 2000,
     priceMax: 3000,
-    currency: 'KES',
+    currency: 'KES'
   },
   {
     id: 'mock-3',
@@ -43,7 +43,7 @@ export const mockEvents = [
     category: 'Arts & Theatre',
     priceMin: 3000,
     priceMax: 4000,
-    currency: 'KES',
+    currency: 'KES'
   },
   {
     id: 'mock-4',
@@ -57,7 +57,7 @@ export const mockEvents = [
     category: 'Comedy',
     priceMin: 2000,
     priceMax: 2000,
-    currency: 'KES',
+    currency: 'KES'
   },
   {
     id: 'mock-5',
@@ -71,7 +71,7 @@ export const mockEvents = [
     category: 'Music',
     priceMin: 2500,
     priceMax: 3500,
-    currency: 'KES',
+    currency: 'KES'
   },
   {
     id: 'mock-6',
@@ -85,6 +85,6 @@ export const mockEvents = [
     category: 'Family',
     priceMin: 2000,
     priceMax: 2500,
-    currency: 'KES',
+    currency: 'KES'
   },
 ]

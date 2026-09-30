@@ -1,4 +1,3 @@
-import { nearest_date } from '../utils/nearestDate'
 import EventCard from './EventCard'
 import './EventGrid.css'
 
@@ -15,7 +14,7 @@ function SkeletonCard() {
   )
 }
 
-function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onDatesChange= {}}) {
+function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6}) {
   if (error) {
     return (
       <p className="event-grid__status" role="alert">
@@ -38,20 +37,8 @@ function EventGrid({ events = [], loading = false, error = null, skeletonCount =
     return <p className="event-grid__status">No events found. Try a different search.</p>
   }
 
-  //onDatesChange = true makes it arrange itself
-  if (onDatesChange == true) {
-  return (
-    <ul className="event-grid">
-      {nearest_date.map((event) => (
-        <li key={event.date}>
-          <EventCard event={event} />
-        </li>
-      ))} 
-    </ul>
-  )
-  }
 
-  return (
+return (
     <ul className="event-grid">
       {events.map((event) => (
         <li key={event.id}>
@@ -59,10 +46,8 @@ function EventGrid({ events = [], loading = false, error = null, skeletonCount =
         </li>
       ))} 
     </ul>
-    
-    
   )
-  
+
 }
 
 export default EventGrid
