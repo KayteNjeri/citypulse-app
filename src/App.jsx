@@ -22,8 +22,6 @@ function matchesQuery(event, query) {
 function App() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
-  // TODO: replace with real authentication once the auth flow exists.
-  const [user, setUser] = useState(null)
   const [city, setCity] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -119,11 +117,7 @@ const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
 
   return (
     <>
-      <NavBar
-        user={user}
-        onLogin={() => setUser({ name: 'Demo User' })}
-        onLogout={() => setUser(null)}
-      />
+      <NavBar />
       <main className="app">
         <h1 className="visually-hidden">Group2 events</h1>
         <section className="filters" aria-label="Filter events">

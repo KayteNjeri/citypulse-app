@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { formatDate, formatPrice } from '../utils/formatEvent';
+import TicketLink from './TicketLink';
 import './EventDetailModal.css';
 
 const FOCUSABLE_SELECTOR =
@@ -61,6 +62,7 @@ export default function EventDetailModal({ isOpen, onClose, event }) {
   const { name, category, date, time, image, url, priceMin, priceMax, currency, venue, city } =
     event;
 
+  const posterSrc = image || 'https://placehold.co/600x350?text=No+Image+Available';
   const formattedDate = formatDate(date, time);
   const price = formatPrice(priceMin, priceMax, currency);
 
@@ -88,12 +90,9 @@ export default function EventDetailModal({ isOpen, onClose, event }) {
           </button>
         </header>
 
-        <div className="poster-container">
-          <img
-            src={image || 'https://placehold.co/600x350?text=No+Image+Available'}
-            alt={name}
-            className="event-poster-img"
-          />
+        {/* Whole photo shown (no cropping); a blurred copy fills the space around it. */}
+        <div className="poster-container" style={{ '--poster-url': `url("${posterSrc}")` }}>
+          <img src={posterSrc} alt={name} className="event-poster-img" />
         </div>
 
         <div className="drawer-content">
@@ -124,9 +123,9 @@ export default function EventDetailModal({ isOpen, onClose, event }) {
 
         <footer className="drawer-footer">
           {url ? (
-            <a href={url} target="_blank" rel="noopener noreferrer" className="ticket-btn">
+            <TicketLink url={url} eventName={name} className="ticket-btn">
               Get Tickets ↗
-            </a>
+            </TicketLink>
           ) : (
             <button className="ticket-btn disabled" disabled>
               Tickets Unavailable

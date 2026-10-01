@@ -1,4 +1,5 @@
 import EventCard from './EventCard'
+import TicketLink from './TicketLink'
 import { daysUntilLabel, formatPrice, whenPhrase } from '../utils/formatEvent'
 import './FeaturedBanner.css'
 
@@ -24,9 +25,9 @@ function FeaturedBanner({ event, onSelect }) {
           Get your early bird ticket for <strong>{name}</strong>, coming {whenPhrase(date)}.
           {fromPrice && <> Tickets from {fromPrice} — while they last.</>}
         </p>
-        <a className="featured-banner__cta" href={url} target="_blank" rel="noopener noreferrer">
+        <TicketLink className="featured-banner__cta" url={url} eventName={name}>
           Get early bird ticket<span className="visually-hidden"> for {name}</span>
-        </a>
+        </TicketLink>
       </div>
 
       <div className="featured-banner__card">
