@@ -1,16 +1,18 @@
 :root {
-  /* Dark theme is the app's only theme. */
-  --text: #9ca3af;
-  --text-h: #f3f4f6;
-  --bg: #16171d;
-  --border: #2e303a;
-  --code-bg: #1f2028;
-  --accent: #c084fc;
-  --accent-bg: rgba(192, 132, 252, 0.15);
-  --accent-border: rgba(192, 132, 252, 0.5);
-  --social-bg: rgba(47, 48, 58, 0.5);
+  /* Dark maroon theme. --bg is the surface colour for panels, cards and inputs
+     (translucent so the page gradient shows through). */
+  --text: #cbb8ba;
+  --text-h: #fff;
+  --bg: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --accent: #ff6b5b;
+  --accent-bg: rgba(255, 107, 91, 0.15);
+  --accent-border: rgba(255, 107, 91, 0.5);
+  --button-bg: #c0262d;
+  --social-bg: rgba(255, 255, 255, 0.05);
   --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.45) 0 10px 15px -3px, rgba(0, 0, 0, 0.3) 0 4px 6px -2px;
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -19,7 +21,13 @@
   letter-spacing: 0.18px;
   color-scheme: dark;
   color: var(--text);
-  background: var(--bg);
+  min-height: 100%;
+  /* Near-black with maroon glows (top right, bottom left), fixed while scrolling. */
+  background:
+    radial-gradient(120% 80% at 100% 0%, #6e1013 0%, rgba(110, 16, 19, 0) 60%),
+    radial-gradient(90% 70% at 0% 100%, #3d0a0c 0%, rgba(61, 10, 12, 0) 65%),
+    #0e0405;
+  background-attachment: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

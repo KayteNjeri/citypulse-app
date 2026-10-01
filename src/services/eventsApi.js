@@ -1,10 +1,25 @@
 // src/services/eventsApi.js
-import { mockEvents } from '../data/mockEvents'
+import { mockEvents } from '../data/mockEvents.js'
+import { normalizeEvent } from '../utils/normalizeEvent.js'
 
 const BASE_URL = 'https://app.ticketmaster.com/discovery/v2/events.json'
-const API_KEY = import.meta.env.VITE_TICKETMASTER_API_KEY
+// Vite injects import.meta.env in the app; under Node (npm test) it's undefined, so fall back to process.env.
+const API_KEY =
+  import.meta.env?.VITE_TICKETMASTER_API_KEY ?? globalThis.process?.env?.VITE_TICKETMASTER_API_KEY
+// Give up on a slow Ticketmaster response and show sample events instead.
+const REQUEST_TIMEOUT_MS = 5000
 
 export async function fetchEvents({ city, category, startDate, endDate, keyword } = {}) {
+  // No key configured: the request can only fail (401), so skip the network
+  // round-trip and show sample events immediately.
+  if (!API_KEY) {
+    return {
+      events: filterMockEvents({ city, category, startDate, endDate, keyword }),
+      error: 'No Ticketmaster API key configured. Showing sample events instead.',
+      usedFallback: true,
+    }
+  }
+
   const params = new URLSearchParams({ apikey: API_KEY })
 
   if (keyword) params.append('keyword', keyword)
@@ -14,14 +29,17 @@ export async function fetchEvents({ city, category, startDate, endDate, keyword 
   if (endDate) params.append('endDateTime', `${endDate}T23:59:59Z`)
 
   try {
-    const response = await fetch(`${BASE_URL}?${params.toString()}`)
+    const response = await fetch(`${BASE_URL}?${params.toString()}`, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
 
     if (!response.ok) {
       throw new Error(`Ticketmaster API error: ${response.status}`)
     }
 
     const data = await response.json()
-    const events = normalizeEvents(data)
+    // Single normalization pipeline (RULES.md 3.2): every event goes through normalizeEvent.
+    const events = (data._embedded?.events ?? []).map(normalizeEvent).filter(Boolean)
 
     // API returned successfully but with zero results — not an error,
     // so we return the empty array as-is rather than falling back.
@@ -34,24 +52,6 @@ export async function fetchEvents({ city, category, startDate, endDate, keyword 
       usedFallback: true,
     }
   }
-}
-
-function normalizeEvents(rawData) {
-  const events = rawData._embedded?.events || []
-  return events.map((event) => ({
-    id: event.id,
-    name: event.name,
-    date: event.dates?.start?.localDate ?? 'TBA',
-    time: event.dates?.start?.localTime ?? null,
-    image: event.images?.find((img) => img.width > 500)?.url ?? event.images?.[0]?.url,
-    venue: event._embedded?.venues?.[0]?.name ?? 'Unknown venue',
-    city: event._embedded?.venues?.[0]?.city?.name ?? '',
-    category: event.classifications?.[0]?.segment?.name ?? 'Uncategorized',
-    priceRange: event.priceRanges
-      ? `$${event.priceRanges[0].min} - $${event.priceRanges[0].max}`
-      : 'Price not available',
-    ticketUrl: event.url,
-  }))
 }
 
 // Mirrors the same filters against local mock data so the fallback

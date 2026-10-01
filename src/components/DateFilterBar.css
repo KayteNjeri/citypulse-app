@@ -3,108 +3,150 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  background-color: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  backdrop-filter: blur(12px);
   flex-wrap: wrap;
 }
-.input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #1f1f2e;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    padding: 8px 12px;
-}
-.input-wrap.clickable {
-    cursor: pointer;
-    position: relative;
-    min-width: 140px;
-}
-.input-wrap.clickable input[type="date"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    cursor: pointer;
-}
-.cal-label {
-    color: #fff;
-    font-size: 14px;
-    pointer-events: none;
-}
-.input-wrap span {font-size: 14px;}
 
-.input-wrap input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #fff;
-    font-size: 14px;
-    width: 150px;
+.date-left,
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-.date-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+
+/* Every control is 44px tall so the whole filter panel lines up. */
+.input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
 }
-.date-filter-bar select, 
-.date-filter-bar input {
-    padding: 9px;
-    border-radius: 8px;
-    cursor: pointer;
-    outline: none;
-  margin-right: 10px;
-  font-weight: bold;
+
+.input-wrap.clickable {
+  position: relative;
+  min-width: 150px;
+  cursor: pointer;
 }
-.date-right{
-    display: flex;
-    align-items: center;
-    gap: 10px;
+
+/* The native date input sits invisibly on top so the whole box opens the picker. */
+.input-wrap.clickable input[type='date'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
-.count, .clear-button {
-    height: 36px;
-    padding: 0 18px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid rgba(96, 165, 250, 0.25);
-    transition: all 0.2s ease;
-    margin-bottom: 2px;
+
+.input-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.count{
-    background: rgba(59, 130, 246, 0.15);
-    color: #93c5fd;
-    backdrop-filter: blur(6px);
+
+.input-wrap input[type='text'] {
+  width: 140px;
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-h);
+  background: transparent;
+  border: none;
+  outline: none;
+
+  &::placeholder {
+    color: var(--text);
+  }
 }
+
+.cal-label {
+  font-size: 15px;
+  color: var(--text-h);
+  pointer-events: none;
+}
+
+.cal-label--empty {
+  color: var(--text);
+}
+
+.to-text {
+  color: var(--text);
+}
+
+.date-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.count {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
 .clear-button {
-    background:rgba(59, 130, 246, 0.25);
-    color: #bfdbfe;
-    cursor: pointer;
-    font-weight: bold;
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
-.clear-button:hover {
-    background: #3b82f6;
-    color: white;
-    transform: translateY(-1px);
-}
-.clear-button:active {
-    transform: translateY(0);
-}
+
+/* Phones: each control full width; the date pair shares one row. */
 @media (max-width: 640px) {
-    .date-filter-bar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .date-left, .date-right {
-        margin-bottom: 10px;
-    }
+  .date-left,
+  .date-range {
+    width: 100%;
+  }
+
+  .date-left > .input-wrap,
+  .input-wrap input[type='text'] {
+    flex: 1;
+    width: auto;
+  }
+
+  .date-range .input-wrap.clickable {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-right {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

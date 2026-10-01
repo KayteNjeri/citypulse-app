@@ -10,6 +10,7 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
         Group2
       </Link>
 
+      {categories && (
       <div className="nav__filter">
         <label htmlFor="category-filter" className="visually-hidden">
           Filter by category
@@ -27,6 +28,7 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
           ))}
         </select>
       </div>
+      )}
 
       <nav className="nav__profile" aria-label="Account">
         {user ? (

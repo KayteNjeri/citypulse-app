@@ -7,8 +7,10 @@
   gap: 16px;
   /* Full-bleed bar; side padding lines its content up with the 1126px main column. */
   padding: 14px max(32px, calc((100% - 1126px) / 2 + 32px));
+  /* Dark, slightly see-through bar so the maroon gradient shows behind it. */
+  background: rgba(14, 4, 5, 0.7);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
 
   /* Phones: brand + account on the first row, category filter full-width below. */
   @media (max-width: 640px) {
@@ -63,6 +65,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 
   @media (max-width: 640px) {
     margin-left: auto;
@@ -127,11 +130,12 @@
 
 .nav__button--primary {
   color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--button-bg);
+  border-color: var(--button-bg);
 
   &:hover {
-    border-color: var(--accent);
+    border-color: var(--button-bg);
     opacity: 0.9;
   }
 }
+

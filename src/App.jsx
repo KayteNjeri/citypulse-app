@@ -38,11 +38,11 @@ function App() {
   // See src/services/eventsApi.js — tries Ticketmaster first, falls back
   // to mockEvents internally if the live call fails. App.jsx just renders
   // whatever comes back, without needing to know which source it was.
-const { events: apiEvents, loading: apiLoading, error: apiError, fetchEvents } = useEvents()
+const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
 
   useEffect(() => {
     fetchEvents({})
-  }, [])
+  }, [fetchEvents])
 
   //Temporary test
   // useEffect(() => {
@@ -79,7 +79,7 @@ const { events: apiEvents, loading: apiLoading, error: apiError, fetchEvents } =
     setCity('')
     setStartDate('')
     setEndDate('')
-    setCategory('')
+    setCategory('all')
     setQuery('')
   }
 
@@ -123,19 +123,37 @@ const { events: apiEvents, loading: apiLoading, error: apiError, fetchEvents } =
         user={user}
         onLogin={() => setUser({ name: 'Demo User' })}
         onLogout={() => setUser(null)}
-        categories={categories}
-        category={category}
-        onCategoryChange={setCategory}
       />
       <main className="app">
         <h1 className="visually-hidden">Group2 events</h1>
-        <SearchBar value={query} onChange={setQuery} />
-        <DateFilterBar 
-          city={city} setCity={setCity} 
-          startDate={startDate} setStartDate={setStartDate} 
-          endDate={endDate} setEndDate={setEndDate} filtered={events} clearFilters={clearFilters} />
+        <section className="filters" aria-label="Filter events">
+          <div className="filters__row">
+            <SearchBar value={query} onChange={setQuery} />
+            <label htmlFor="category-filter" className="visually-hidden">
+              Filter by category
+            </label>
+            <select
+              id="category-filter"
+              className="filters__select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="all">All categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <DateFilterBar
+            city={city} setCity={setCity}
+            startDate={startDate} setStartDate={setStartDate}
+            endDate={endDate} setEndDate={setEndDate} filtered={events} clearFilters={clearFilters} />
+        </section>
         <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
-        <EventGrid events={events} onEventClick={handleOpenModal}/>
+        <h2 className="app__section-title">Upcoming events</h2>
+        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal}/>
         
         {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
       </main>

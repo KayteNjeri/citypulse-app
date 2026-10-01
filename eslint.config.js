@@ -18,4 +18,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Unit tests run under Node's built-in test runner, not the browser.
+    files: ['src/tests/**/*.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])
