@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../auth/authContext'
+import AccountMenu from './AccountMenu'
 import './NavBar.css'
 
-function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChange }) {
+function NavBar({ categories, category, onCategoryChange }) {
+  const { user, logout } = useAuth()
+
   return (
     <header className="nav">
 
@@ -10,6 +14,7 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
         Group2
       </Link>
 
+      {categories && (
       <div className="nav__filter">
         <label htmlFor="category-filter" className="visually-hidden">
           Filter by category
@@ -27,25 +32,20 @@ function NavBar({ user, onLogin, onLogout, categories, category, onCategoryChang
           ))}
         </select>
       </div>
+      )}
 
       <nav className="nav__profile" aria-label="Account">
         {user ? (
-          <>
-            <a className="nav__user" href="#profile">
-              <span className="nav__avatar" aria-hidden="true">
-                {user.name.charAt(0).toUpperCase()}
-              </span>
-              <span className="nav__name">{user.name}</span>
-            </a>
-
-            <button type="button" className="nav__button" onClick={onLogout}>
-              Log out
-            </button>
-          </>
+          <AccountMenu user={user} onLogout={logout} />
         ) : (
-          <button type="button" className="nav__button nav__button--primary" onClick={onLogin}>
-            Log in
-          </button>
+          <>
+            <Link className="nav__button" to="/login">
+              Log in
+            </Link>
+            <Link className="nav__button nav__button--primary" to="/signup">
+              Sign up
+            </Link>
+          </>
         )}
       </nav>
     </header>

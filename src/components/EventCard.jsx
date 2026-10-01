@@ -1,4 +1,5 @@
 import { formatDate, formatPrice } from '../utils/formatEvent'
+import TicketLink from './TicketLink'
 import './EventCard.css'
 
 function EventCard({ event, onSelect }) {
@@ -42,15 +43,14 @@ function EventCard({ event, onSelect }) {
 
         <div className="event-card__footer">
           {price && <span className="event-card__price">{price}</span>}
-          <a
+          <TicketLink
             className="event-card__link"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
+            url={url}
+            eventName={name}
             onClick={(e) => e.stopPropagation()}
           >
             Get tickets<span className="visually-hidden"> for {name}</span>
-          </a>
+          </TicketLink>
         </div>
       </div>
     </article>
