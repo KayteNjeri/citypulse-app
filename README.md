@@ -98,7 +98,7 @@ If `package.json` or `package-lock.json` changed, run `npm install` again. A tea
 | `npm run dev` | Start the Vite dev server |
 | `npm run build` | Production build into `dist/` |
 | `npm run lint` | ESLint (CI fails on errors) |
-| `npm test` | Unit tests (API layer contract, date/price formatting, next-event logic). *Not set up yet: there is no `test` script in `package.json`.* |
+| `npm test` | Unit tests in `src/tests/` with Node's built-in runner: event-shape contract, API success/empty/error/fallback, date and price formatting, next-event logic |
 | `npm run preview` | Serve the production build locally |
 
 ### Environment variables

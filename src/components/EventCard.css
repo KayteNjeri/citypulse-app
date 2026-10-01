@@ -40,7 +40,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    /* Bias the crop upward so faces in portrait photos stay in frame. */
+    object-position: center 20%;
   }
 }
 
@@ -104,12 +105,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   margin-top: auto;
   padding-top: 12px;
 }
 
 .event-card__price {
+  white-space: nowrap;
   font-size: 15px;
   font-weight: 600;
   color: var(--text-h);
@@ -117,6 +120,7 @@
 
 .event-card__link {
   margin-left: auto;
+  white-space: nowrap;
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 15px;

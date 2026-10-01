@@ -11,6 +11,9 @@ function pickImage(images = []) {
 }
 
 export function normalizeEvent(raw) {
+  // Invalid payloads (null, non-objects, events without an id) are dropped by the caller.
+  if (!raw || typeof raw !== 'object' || !raw.id) return null
+
   const venue = raw._embedded?.venues?.[0]
   const price = raw.priceRanges?.[0]
 
