@@ -1,5 +1,5 @@
 """SQLAlchemy data models for CityPulse-owned data."""
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from extensions import db
 
 
@@ -25,26 +25,35 @@ class Plan(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     title = db.Column(db.String(160), nullable=False)
     description = db.Column(db.Text)
-    plan_date = db.Column(db.Date)
+    event_date = db.Column(db.Date)
     city = db.Column(db.String(120))
+    status = db.Column(db.String(20), nullable=False, default="saved", server_default="saved")
+    is_public = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
 
     user = db.relationship("User", back_populates="plans")
     saved_events = db.relationship("SavedEvent", back_populates="plan", cascade="all, delete-orphan", passive_deletes=True)
 
-    def to_dict(self, include_events=False):
-        data = {
+    def serialize(self, include_events=False):
+        payload = {
             "id": self.id,
+            "user_id": self.user_id,
             "title": self.title,
             "description": self.description,
-            "plan_date": self.plan_date.isoformat() if self.plan_date else None,
+            "event_date": self.event_date.isoformat() if isinstance(self.event_date, date) else None,
             "city": self.city,
+            "status": self.status,
+            "is_public": self.is_public,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-        }
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "event_count": len(self.saved_events),
+        }  
         if include_events:
-            data["saved_events"] = [event.to_dict() for event in self.saved_events]
-        return data
-
+            payload["saved_events"] = [ev.serialize() for ev in self.saved_events]
+        return payload
+    def to_dict(self, include_events=False):
+        return self.serialize(include_events=include_events)
 
 class SavedEvent(db.Model):
     __tablename__ = "saved_events"
@@ -70,14 +79,56 @@ class SavedEvent(db.Model):
 
     plan = db.relationship("Plan", back_populates="saved_events")
 
-    def to_dict(self):
+    @property
+    def is_past(self):
+        if not self.event_date:
+            return False
+        try:
+            ev_date = date.fromisoformat(self.event_date[:10])
+            return ev_date < date.today()
+        except:
+            return False
+    @property
+    def days_until(self):
+        if not self.event_date or self.is_past:
+            return None
+        try:
+            ev_date = date.fromisoformat(self.event_date[:10]) 
+            delta = ev_date - date.today()
+            return delta.days
+        except:
+            return None
+        
+    @property
+    def days_ago(self):
+        if not self.is_past:
+            return 0
+        try:
+            ev_date = date.fromisoformat(self.event_date[:10]) 
+            delta = date.today() - ev_date
+            return delta.days
+        except:
+            return 0
+    def serialize(self):
         return {
-            "id": self.id, "plan_id": self.plan_id,
-            "ticketmaster_id": self.ticketmaster_id, "name": self.name,
-            "url": self.url, "image": self.image, "date": self.date,
-            "time": self.time, "venue": self.venue, "city": self.city,
-            "category": self.category, "price_min": self.price_min,
-            "price_max": self.price_max, "currency": self.currency,
-            "note": self.note, "status": self.status,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "id": self.id,
+            "plan_id": self.plan_id,
+            "ticketmaster_id": self.ticketmaster_id,
+            "name": self.name,
+            "url": self.url,
+            "image": self.image,
+            "date": self.date,
+            "time": self.time,
+            "venue": self.venue,
+            "city": self.city,
+            "category": self.category,
+            "price_min": self.price_min,
+            "price_max": self.price_max,
+            "currency": self.currency,
+            "note": self.note,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None
         }
+    
+    def to_dict(self):
+        return self.serialize()

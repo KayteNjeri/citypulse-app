@@ -6,6 +6,8 @@ from models import User, Plan
 
 app = create_app()
 with app.app_context():
+    db.create_all()
+    print("Database tables created.")
     user = User.query.filter_by(email="david.local@example.test").first()
     if user is None:
         user = User(name="Local Developer", email="david.local@example.test",
