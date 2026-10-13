@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, timedelta
 from flask import Blueprint, g, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from auth import require_user
 from extensions import db
@@ -10,8 +11,6 @@ plans_bp = Blueprint("plans", __name__)
 
 def error(code, message, status):
     return jsonify(error={"code": code, "message": message}), status
-
-
 def parse_plan_date(value):
     if value in (None, ""):
         return None
@@ -19,165 +18,177 @@ def parse_plan_date(value):
         return date.fromisoformat(value)
     except (TypeError, ValueError):
         raise ValueError("plan_date must use YYYY-MM-DD format")
+    
+def get_owned_plan(plan_id):
+    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
+    if plan is None:
+        return None, error("not_found", "Plan not found", 404)
+    return plan, None
 
-
-@plans_bp.get("")
+# PLANS CRUD
 @plans_bp.get("/")
 @require_user
-def list_plans():
+def fetch_plans():
     plans = Plan.query.filter_by(user_id=g.current_user.id).order_by(Plan.created_at.desc()).all()
-    return jsonify(data=[plan.to_dict() for plan in plans]), 200
-
-
-@plans_bp.post("")
+    return jsonify(data=[p.serialize() for p in plans]), 200
+    
 @plans_bp.post("/")
 @require_user
-def create_plan():
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict):
+def add_plan():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
         return error("invalid_json", "A JSON object is required", 400)
-    title = body.get("title")
-    if not isinstance(title, str) or not title.strip():
+    raw_title = payload.get("title", "")
+    if not isinstance(raw_title, str) or not raw_title.strip():
         return error("validation_error", "title is required", 422)
-    if len(title.strip()) > 160:
-        return error("validation_error", "title must be 160 characters or fewer", 422)
+    if len(raw_title.strip()) > 160:
+        return error("validation_error", "title must be 160 characters or less", 422)
     try:
-        plan_date = parse_plan_date(body.get("plan_date"))
-    except ValueError as exc:
-        return error("validation_error", str(exc), 422)
+        p_date = parse_plan_date(payload.get("event_date"))
+    except ValueError as e:
+        return error("validation_error", str(e), 422)
 
-    plan = Plan(user_id=g.current_user.id, title=title.strip(),
-                description=body.get("description"), plan_date=plan_date,
-                city=body.get("city"))
-    db.session.add(plan)
+    new_plan = Plan(
+        user_id=g.current_user.id, 
+        title=raw_title.strip(),
+        description=str(payload.get("description") or "").strip(), 
+        event_date=p_date,
+        city=(str(payload.get("city") or "").strip() or None),
+        is_public=bool(payload.get("is_public", False)),
+        status=str(payload.get("status") or "saved").strip().lower()
+    )
+    db.session.add(new_plan)
     try:
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        return error("database_error", "Could not create plan", 500)
-    return jsonify(data=plan.to_dict()), 201
+        return error("database_error", "Failed to create plan", 500)
+    
+    return jsonify(data=new_plan.serialize()), 201
 
 
 @plans_bp.get("/<int:plan_id>")
 @require_user
-def get_plan(plan_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None:
-        return error("not_found", "Plan not found", 404)
-    return jsonify(data=plan.to_dict(include_events=True)), 200
-
+def fetch_plan(plan_id):
+    plan, error = get_owned_plan(plan_id)
+    if error:
+        return error
+    return jsonify(data=plan.serialize(include_events=True)), 200
 
 @plans_bp.patch("/<int:plan_id>")
 @require_user
-def update_plan(plan_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None:
-        return error("not_found", "Plan not found", 404)
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict):
+def edit_plan(plan_id):
+    plan, error = get_owned_plan(plan_id)
+    if error:
+        return error
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
         return error("invalid_json", "A JSON object is required", 400)
-    if "title" in body:
-        if not isinstance(body["title"], str) or not body["title"].strip():
+    if "title" in payload:
+        t = payload["title"]
+        if not isinstance(t, str) or not t.strip():
             return error("validation_error", "title cannot be empty", 422)
-        plan.title = body["title"].strip()
-    if "description" in body: plan.description = body["description"]
-    if "city" in body: plan.city = body["city"]
-    if "plan_date" in body:
-        try: plan.plan_date = parse_plan_date(body["plan_date"])
-        except ValueError as exc: return error("validation_error", str(exc), 422)
+        plan.title = t.strip()
+    if "description" in payload: 
+        plan.description = str(payload.get("description") or "").strip()
+    if "is_public" in payload:
+        plan.is_public = bool(payload.get("is_public", False))
+    if "city" in payload: 
+        plan.city = str(payload.get("city") or "").strip() or None
+    if "event_date" in payload:
+        try: plan.event_date = parse_plan_date(payload["event_date"])
+        except ValueError as e: return error("validation_error", str(e), 422)
+    if "status" in payload:
+        plan.status = str(payload.get("status") or "saved").strip() or "saved"
+
     try:
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        return error("database_error", "Could not update plan", 500)
-    return jsonify(data=plan.to_dict()), 200
-
+        return error("database_error", "Failed to update plan", 500)
+    return jsonify(data=plan.serialize()), 200
 
 @plans_bp.delete("/<int:plan_id>")
 @require_user
 def delete_plan(plan_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None:
+    plan, error = get_owned_plan(plan_id)
+    if error:
+        return error
+    if not plan:
         return error("not_found", "Plan not found", 404)
     db.session.delete(plan)
     try: db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        return error("database_error", "Could not delete plan", 500)
+        return error("database_error", "Failed to delete plan", 500)
     return "", 204
 
-
-@plans_bp.get("/<int:plan_id>/events")
+#SAVED EVENTS CRUD
+@plans_bp.get("/saved")
 @require_user
-def list_saved_events(plan_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None: return error("not_found", "Plan not found", 404)
-    return jsonify(data=[event.to_dict() for event in plan.saved_events]), 200
+def get_all_saved_event():
+    status = request.args.get("status")
+    q = Plan.query.filter_by(user_id=g.current_user.id)
+    if status:
+        q = q.filter_by(status=status)
+    
+    section = request.args.get("section", "all")
 
+    evs = q.order_by(Plan.event_date.desc()).all()
 
-@plans_bp.post("/<int:plan_id>/events")
+    if section == "upcoming":
+        evs = [e for e in evs if e.event_date and e.event_date >= date.today()]
+    elif section == "previous":
+        evs = [e for e in evs if e.event_date and e.event_date < date.today()]
+    elif section == "interested_soon":
+        evs = [e for e in evs if e.status == "interested" and e.event_date and 0 <= (e.event_date - date.today()).days <= 5]
+    return jsonify(data=[e.serialize() for e in evs]), 200
+ 
+@plans_bp.delete("/events/<int:event_id>")
 @require_user
-def save_event(plan_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None: return error("not_found", "Plan not found", 404)
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict): return error("invalid_json", "A JSON object is required", 400)
-    ticketmaster_id, name = body.get("ticketmaster_id"), body.get("name")
-    if not isinstance(ticketmaster_id, str) or not ticketmaster_id.strip() or not isinstance(name, str) or not name.strip():
-        return error("validation_error", "ticketmaster_id and name are required", 422)
-    status = body.get("status", "interested")
-    if status not in ("interested", "going"):
-        return error("validation_error", "status must be interested or going", 422)
-    event = SavedEvent(plan_id=plan.id, ticketmaster_id=ticketmaster_id.strip(), name=name.strip(),
-        url=body.get("url"), image=body.get("image"), date=body.get("date"), time=body.get("time"),
-        venue=body.get("venue"), city=body.get("city"), category=body.get("category"),
-        price_min=body.get("price_min"), price_max=body.get("price_max"), currency=body.get("currency"),
-        note=body.get("note"), status=status)
-    db.session.add(event)
-    try: db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return error("duplicate_event", "This event is already saved in this plan", 409)
+def delete_saved_event(event_id):
+    ev = db.session.query(SavedEvent).join(Plan).filter(
+        Plan.user_id == g.current_user.id, 
+        SavedEvent.id == event_id,
+        SavedEvent.plan_id == Plan.id
+    ).first()
+    if not ev:
+        return error("not_found", "Saved event not found", 404)
+    db.session.delete(ev)
+    try:
+        db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
-        return error("database_error", "Could not save event", 500)
-    return jsonify(data=event.to_dict()), 201
-
-
-@plans_bp.patch("/<int:plan_id>/events/<int:event_id>")
-@require_user
-def update_saved_event(plan_id, event_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None: return error("not_found", "Plan not found", 404)
-    event = SavedEvent.query.filter_by(id=event_id, plan_id=plan.id).first()
-    if event is None: return error("not_found", "Saved event not found", 404)
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict): return error("invalid_json", "A JSON object is required", 400)
-    if "note" in body:
-        if body["note"] is not None and not isinstance(body["note"], str):
-            return error("validation_error", "note must be a string or null", 422)
-        event.note = body["note"]
-    if "status" in body:
-        if body["status"] not in ("interested", "going"):
-            return error("validation_error", "status must be interested or going", 422)
-        event.status = body["status"]
-    try: db.session.commit()
-    except SQLAlchemyError:
-        db.session.rollback()
-        return error("database_error", "Could not update saved event", 500)
-    return jsonify(data=event.to_dict()), 200
-
-
-@plans_bp.delete("/<int:plan_id>/events/<int:event_id>")
-@require_user
-def delete_saved_event(plan_id, event_id):
-    plan = Plan.query.filter_by(id=plan_id, user_id=g.current_user.id).first()
-    if plan is None: return error("not_found", "Plan not found", 404)
-    event = SavedEvent.query.filter_by(id=event_id, plan_id=plan.id).first()
-    if event is None: return error("not_found", "Saved event not found", 404)
-    db.session.delete(event)
-    try: db.session.commit()
-    except SQLAlchemyError:
-        db.session.rollback()
-        return error("database_error", "Could not delete saved event", 500)
+        return error("database_error", "Failed to delete saved event", 500)
     return "", 204
+
+@plans_bp.delete("/bulk-delete")
+@require_user
+def bulk_delete_saved_events():
+    payload = request.get_json() or {}
+    ids = payload.get("ids", [])
+    if not ids or not isinstance(ids, list) or not all(isinstance(i, int) for i in ids):
+        return error("validation_error", "A list of integer IDs is required", 422)
+    Plan.query.filter(
+        Plan.user_id == g.current_user.id,
+        Plan.id.in_(ids)
+    ).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(message=f"Deleted {len(ids)} events"), 200
+
+@plans_bp.get("/notifications/upcoming")
+@require_user
+def get_notifications():
+    today = date.today()
+    next_week = today + timedelta(days=7)
+    evs = Plan.query.filter(
+        Plan.user_id ==g.current_user.id,
+        Plan.event_date >= today,
+        Plan.event_date <= next_week
+    ).order_by(Plan.event_date.asc()).all()
+    upcoming_events = []
+    return jsonify({
+        "count": len(evs),
+        "data": [e.serialize() for e in evs],
+        "has_notifications": any(e.event_date and today <= e.event_date <= next_week for e in evs)
+    }), 200
