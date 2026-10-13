@@ -17,6 +17,21 @@ function NavBar({ categories, category, onCategoryChange }) {
         Group2
       </Link>
 
+      {/* Main navigation links 
+      <nav className="nav__links" aria-label="Main Navigation">
+        <NavLink to="/" end>
+          Home
+        </NavLink>
+
+        <a href="/#upcoming-events">Events</a>
+
+        {user && (
+          <NavLink to="/my-plans">
+            My Plans
+          </NavLink>
+        )}
+      </nav> */}
+
       {categories && (
       <div className="nav__filter">
         <label htmlFor="category-filter" className="visually-hidden">

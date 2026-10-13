@@ -45,6 +45,13 @@
   }
 }
 
+.event-card__media .heart-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+}
+
 .event-card__placeholder {
   display: grid;
   place-items: center;
