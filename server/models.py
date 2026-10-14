@@ -81,19 +81,19 @@ class SavedEvent(db.Model):
 
     @property
     def is_past(self):
-        if not self.event_date:
+        if not self.date:
             return False
         try:
-            ev_date = date.fromisoformat(self.event_date[:10])
+            ev_date = date.fromisoformat(self.date[:10])
             return ev_date < date.today()
         except:
             return False
     @property
     def days_until(self):
-        if not self.event_date or self.is_past:
+        if not self.date or self.is_past:
             return None
         try:
-            ev_date = date.fromisoformat(self.event_date[:10]) 
+            ev_date = date.fromisoformat(self.date[:10]) 
             delta = ev_date - date.today()
             return delta.days
         except:
@@ -104,7 +104,7 @@ class SavedEvent(db.Model):
         if not self.is_past:
             return 0
         try:
-            ev_date = date.fromisoformat(self.event_date[:10]) 
+            ev_date = date.fromisoformat(self.date[:10]) 
             delta = date.today() - ev_date
             return delta.days
         except:
