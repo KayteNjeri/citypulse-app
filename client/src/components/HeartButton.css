@@ -1,0 +1,35 @@
+.heart-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 50%;
+  background: #fff;
+  color: #555;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.heart-button:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.heart-button--saved {
+  color: #e05260;
+  border-color: #e05260;
+  background: #ffe5e9;
+}
+
+.heart-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.heart-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}

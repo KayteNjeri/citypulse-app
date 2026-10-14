@@ -1,8 +1,9 @@
 import { formatDate, formatPrice } from '../utils/formatEvent'
 import TicketLink from './TicketLink'
 import './EventCard.css'
+import HeartButton from './HeartButton'
 
-function EventCard({ event, onSelect }) {
+function EventCard({ event, onSelect, saved = false, saving = false, onToggleSave }) {
   const { name, url, image, date, time, venue, city, category, priceMin, priceMax, currency } =
     event
   const price = formatPrice(priceMin, priceMax, currency)
@@ -34,6 +35,12 @@ function EventCard({ event, onSelect }) {
           </div>
         )}
         {category && <span className="event-card__category">{category}</span>}
+
+        <HeartButton
+          saved={saved}
+          loading={saving}
+          onClick={onToggleSave}
+        />
       </div>
 
       <div className="event-card__body">
