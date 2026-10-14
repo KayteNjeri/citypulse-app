@@ -19,3 +19,4 @@ class Config:
     # Temporary development-only auth bridge. Disable outside local development.
     DEV_AUTH_STUB = os.getenv("DEV_AUTH_STUB", "false").lower() == "true"
     DEV_AUTH_USER_ID = int(os.getenv("DEV_AUTH_USER_ID", "1"))
+    TICKETMASTER_API_KEY = os.getenv("TICKETMASTER_API_KEY")
