@@ -14,7 +14,7 @@ function SkeletonCard() {
   )
 }
 
-function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick }) {
+function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick, savedEventIds = [], savingEventIds = [], onSaveEvent = [], onToggleSave, }) {
   if (error) {
     return (
       <p className="event-grid__status" role="alert">
@@ -41,7 +41,7 @@ function EventGrid({ events = [], loading = false, error = null, skeletonCount =
     <ul className="event-grid">
       {events.map((event) => (
         <li key={event.id}>
-          <EventCard event={event} onSelect={onEventClick} />
+          <EventCard event={event} onSelect={onEventClick} saved={savedEventIds.includes(event.id)} saving={savingEventIds.includes(event.id)} onToggleSave={onToggleSave ? () => onToggleSave(event) : undefined} />
         </li>
       ))}
     </ul>

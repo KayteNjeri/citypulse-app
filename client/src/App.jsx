@@ -51,6 +51,12 @@ function App() {
   // One sort at a time: 'all' (default order), a price sort, or a date sort.
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.none)
 
+  //Track saved event IDs for teh heart-button interaction
+  const [savedEventIds, setSavedEventIds] = useState([])
+
+  //Track events currently being saved
+  const [savingEventIds, setSavingEventIds] = useState([])
+
 
   // Role 4: Event Detail Modal state management
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -83,6 +89,21 @@ const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedEvent(null)
+  }
+
+  // Toggle the saved state of an event by its ID. If the event is already saved, remove it from the saved list; otherwise, add it to the saved list.
+  const handleToggleSave = (event) => {
+    const eventId = event.id
+
+    if (eventId === undefined || eventId === null) {
+      console.error("Cannot save event without a valid ID:", event)
+      return
+    }
+    setSavedEventIds((prevSavedEventIds) => 
+      prevSavedEventIds.includes(eventId)
+        ? prevSavedEventIds.filter((id) => id !== eventId)
+        : [...prevSavedEventIds, eventId]
+    )
   }
 
   // NEW CHANGE: Replaced mockEvents with apiEvents to get the data from API
@@ -162,7 +183,7 @@ const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
         </section>
         <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
         <h2 className="app__section-title" ref={resultsRef}>Upcoming events</h2>
-        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal}/>
+        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal} savedEventIds={savedEventIds} savingEventIds={savingEventIds} onToggleSave={handleToggleSave}/>
 
         {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
       </main>
