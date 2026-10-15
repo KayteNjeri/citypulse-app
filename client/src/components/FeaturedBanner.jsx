@@ -3,7 +3,7 @@ import TicketLink from './TicketLink'
 import { daysUntilLabel, formatPrice, whenPhrase } from '../utils/formatEvent'
 import './FeaturedBanner.css'
 
-function FeaturedBanner({ event, onSelect }) {
+function FeaturedBanner({ event, onSelect, saved = false, saving = false, onToggleSave }) {
   if (!event) return null
 
   const { name, url, image, date, priceMin, currency } = event
@@ -31,7 +31,13 @@ function FeaturedBanner({ event, onSelect }) {
       </div>
 
       <div className="featured-banner__card">
-        <EventCard event={event} onSelect={onSelect} />
+        <EventCard
+          event={event}
+          onSelect={onSelect}
+          saved={saved}
+          saving={saving}
+          onToggleSave={onToggleSave ? () => onToggleSave(event) : undefined}
+        />
       </div>
     </section>
   )

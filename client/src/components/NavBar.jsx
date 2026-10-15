@@ -14,7 +14,6 @@ function NavBar({ categories, category, onCategoryChange }) {
 
       <Link className="nav__brand" to="/">
         <img className="nav__logo" src="/group2-logo.jpg" alt="" width="68" height="68" />
-        Group2
       </Link>
 
       {/* Main navigation links 
