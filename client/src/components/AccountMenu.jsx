@@ -56,6 +56,9 @@ function AccountMenu({ user, onLogout }) {
             <p className="account-menu__full-name">{user.name}</p>
             {user.email && <p className="account-menu__email">{user.email}</p>}
           </div>
+          <Link className="account-menu__item" to="/plans" onClick={() => setOpen(false)}>
+            My plans
+          </Link>
           <Link className="account-menu__item" to="/my-tickets" onClick={() => setOpen(false)}>
             My tickets
           </Link>

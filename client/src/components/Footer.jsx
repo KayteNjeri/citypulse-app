@@ -8,11 +8,10 @@ function Footer () {
                 <div className="footer__brand">
                     <span className="footer__logo" aria-hidden="true">
                     </span>
-                    <span>Group 2</span>
                 </div>
 
                 <p className="footer__text">
-                    Discover local events, activities and experiences happening around the world!
+                Discover local events, activities and experiences happening around the world!
                 </p>
 
                 <div className="footer__links">
