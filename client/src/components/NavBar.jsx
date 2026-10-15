@@ -14,23 +14,10 @@ function NavBar({ categories, category, onCategoryChange }) {
 
       <Link className="nav__brand" to="/">
         <img className="nav__logo" src="/group2-logo.jpg" alt="" width="68" height="68" />
+        CityPulse
       </Link>
 
-      {/* Main navigation links 
-      <nav className="nav__links" aria-label="Main Navigation">
-        <NavLink to="/" end>
-          Home
-        </NavLink>
-
-        <a href="/#upcoming-events">Events</a>
-
-        {user && (
-          <NavLink to="/my-plans">
-            My Plans
-          </NavLink>
-        )}
-      </nav> */}
-
+    
       {categories && (
       <div className="nav__filter">
         <label htmlFor="category-filter" className="visually-hidden">
