@@ -14,7 +14,7 @@ function SkeletonCard() {
   )
 }
 
-function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick, savedEventIds = [], savingEventIds = [], onSaveEvent = [], onToggleSave, }) {
+function EventGrid({ events = [], loading = false, error = null, skeletonCount = 6, onEventClick, savedEventIds = [], savingEventIds = [], onToggleSave, }) {
   if (error) {
     return (
       <p className="event-grid__status" role="alert">

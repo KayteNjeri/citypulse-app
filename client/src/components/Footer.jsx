@@ -7,12 +7,13 @@ function Footer () {
             <div className="footer__content">
                 <div className="footer__brand">
                     <span className="footer__logo" aria-hidden="true">
+                        ●
                     </span>
-                    <span>Group 2</span>
+                    <span>CityPulse</span>
                 </div>
 
                 <p className="footer__text">
-                    Discover local events, activities and experiences happening around the world!
+                Discover local events, activities and experiences happening around the world!
                 </p>
 
                 <div className="footer__links">
@@ -24,7 +25,7 @@ function Footer () {
             </div>
 
             <div className="footer__bottom">
-                <p>© {new Date().getFullYear()} Group 2. All rights reserved.</p>
+                <p>© {new Date().getFullYear()} CityPulse. All rights reserved.</p>
                 
                 <div className="footer__bottom-links">
                     <Link to="/terms">Terms</Link>

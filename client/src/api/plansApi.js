@@ -1,0 +1,86 @@
+// Plans & Saved Events API (Flask, see PHASE2.md §5). Thin fetch wrapper used by the
+// My Plans and Plan Details screens. Swap `request` for Amina's shared client.js once
+// it's merged; the exported functions (and their callers) can stay the same.
+
+const API_URL = (
+  import.meta.env?.VITE_API_URL ??
+  globalThis.process?.env?.VITE_API_URL ??
+  'http://localhost:5001/api'
+).replace(/\/$/, '')
+
+// Where the JWT will live once real auth is merged (the dev auth stub ignores it).
+export const TOKEN_KEY = 'citypulse.token'
+
+export class ApiError extends Error {
+  constructor(message, { status = 0, code = 'unknown' } = {}) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.code = code
+  }
+}
+
+function authHeader() {
+  try {
+    const token = globalThis.localStorage?.getItem(TOKEN_KEY)
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  } catch {
+    return {}
+  }
+}
+
+// Turns a failed response into a message a user can act on.
+export function describeError(status, body) {
+  const code = body?.error?.code
+  const serverMessage = body?.error?.message
+  if (status === 401) return 'Your session has expired. Please log in again.'
+  if (status === 403) return "You don't have access to this plan."
+  if (status === 404 && code === 'not_found') return serverMessage || 'Not found.'
+  if (status === 404 || status === 405) return "This action isn't available on the server yet."
+  if (status === 422) return serverMessage || 'Some details are invalid.'
+  if (status === 503) return serverMessage || 'The server is not ready yet.'
+  if (status >= 500) return 'Something went wrong on the server. Please try again.'
+  return serverMessage || `Request failed (${status}).`
+}
+
+export async function request(path, { method = 'GET', body } = {}) {
+  let response
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method,
+      headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...authHeader() },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+  } catch {
+    throw new ApiError("Can't reach the server. Check that the API is running.", { code: 'network' })
+  }
+
+  if (response.status === 204) return null
+  const json = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new ApiError(describeError(response.status, json), {
+      status: response.status,
+      code: json?.error?.code ?? 'http_error',
+    })
+  }
+  return json?.data ?? json
+}
+
+// Plans
+export const listPlans = () => request('/plans/')
+export const getPlan = (planId) => request(`/plans/${planId}`)
+export const createPlan = (fields) => request('/plans/', { method: 'POST', body: fields })
+export const updatePlan = (planId, fields) => request(`/plans/${planId}`, { method: 'PATCH', body: fields })
+export const deletePlan = (planId) => request(`/plans/${planId}`, { method: 'DELETE' })
+
+// Saved events (server routes in server/routes/plans.py).
+// Every saved event of the user, across all plans (used to fill in the heart buttons).
+export const listAllSavedEvents = () => request('/plans/saved')
+export const listSavedEvents = (planId) => request(`/plans/${planId}/events`)
+// `event` is a snapshot: { ticketmaster_id, name, url, image, date, time, venue, city, category,
+// price_min, price_max, currency }. The server answers 409 if it's already in the plan.
+export const addSavedEvent = (planId, event) => request(`/plans/${planId}/events`, { method: 'POST', body: event })
+// changes: { status: 'interested' | 'going' } and/or { note: string | null }
+export const updateSavedEvent = (eventId, changes) =>
+  request(`/plans/events/${eventId}`, { method: 'PATCH', body: changes })
+export const removeSavedEvent = (eventId) => request(`/plans/events/${eventId}`, { method: 'DELETE' })
