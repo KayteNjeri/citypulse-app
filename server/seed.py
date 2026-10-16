@@ -15,7 +15,7 @@ with app.app_context():
     user = User.query.filter_by(email="david.local@example.test").first()
     if user is None:
         user = User(name="Local Developer", email="david.local@example.test",
-        password_hash="$2b$12$ulGcdjk9BPyrcyi86IrM3OLGh1fp9zbx18zvEw1VDP.SjYoHJ1dgK") #password is "test"
+        password_hash="test") #password is "$2b$12$ulGcdjk9BPyrcyi86IrM3OLGh1fp9zbx18zvEw1VDP.SjYoHJ1dgK"
 
         db.session.add(user)
         db.session.commit()

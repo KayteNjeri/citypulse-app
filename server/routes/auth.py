@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, get_jwt_identity, verify_jwt_in_request, current_user
+from flask import Blueprint, request, jsonify, make_response
+from flask_jwt_extended import create_access_token, get_jwt_identity, verify_jwt_in_request, current_user, set_access_cookies
 from models import *
 from extensions import db
+from datetime import timedelta, datetime
+
 #from auth import require_user
 
 auth_bp = Blueprint("auth", __name__)
@@ -69,7 +71,7 @@ def Registration():
 
 @auth_bp.post("/login")
 def Login():
-    #verify_jwt_in_request()
+    verify_jwt_in_request()
     data = request.get_json() or {}
 
     name = data["name"]
@@ -83,9 +85,11 @@ def Login():
     user = User(id = get_jwt_identity(), name = name, password_hash = password)
 
     if user and user.password_check(password):
-         token = create_access_token(identity = str(User.id))
+         token = create_access_token(identity = str(User.id), expires_delta = datetime.now() + timedelta(hours=1))
          return token
 
+    
+    
     return jsonify({
          "name": user.name,
          "token": token,
@@ -95,12 +99,12 @@ def Login():
 @auth_bp.get("/me")
 def current_user_verification():
         
-        if verify_jwt_in_request():
-            user_id = get_jwt_identity()
-            user = User.query.filter(User.id == user_id).first()
-            return UserSchema().dump(user), 200
-        else:
-            return {"error": "jwt token retrieval error, unauthorized"}, 401
+    if verify_jwt_in_request():
+        user_id = get_jwt_identity()
+        user = User.query.filter(User.id == user_id).first()
+        return UserSchema().dump(user), 200
+    else:
+        return {"error": "jwt token retrieval error, unauthorized"}, 401
 
 
 
