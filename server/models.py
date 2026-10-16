@@ -1,7 +1,8 @@
 """SQLAlchemy data models for CityPulse-owned data."""
 from datetime import datetime, timezone, date
-from extensions import db
-
+from extensions import db, bcrypt
+from marshmallow import Schema, fields
+from sqlalchemy.ext.hybrid import hybrid_property
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -11,11 +12,27 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
     plans = db.relationship("Plan", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+
+    #password hashing
+    @hybrid_property
+    def password_hashing(self):
+        raise Exception('Password hashes may not be viewed.')
+
+    @password_hashing.setter
+    def password_hashing(self, password):
+        password_hashing = bcrypt.generate_password_hash(
+            password.encode('utf-8'))
+        self.password_hash = password_hashing.decode('utf-8')
+
+    def password_check(self, password):
+        return bcrypt.check_password_hash(self.password_hash, password.encode('utf-8'))
+
 
 
 class Plan(db.Model):
@@ -132,3 +149,26 @@ class SavedEvent(db.Model):
     
     def to_dict(self):
         return self.serialize()
+
+
+class UserSchema(Schema):
+    id = fields.Int(dump_only = True)
+    name = fields.String()
+    email = fields.String()
+
+    plans = fields.List(fields.Nested(lambda:PlanSchema(exclude=("user",))))
+
+class PlanSchema(Schema):
+    id = fields.Int(dump_only = True)
+    title = fields.String()
+    description = fields.String()
+    city = fields.String()
+
+    user = fields.Nested(UserSchema(exclude = ("plans",)))
+    savedevents = fields.List(fields.Nested(lambda:SavedEventsSchema(exclude = "plans",)))
+
+class SavedEventsSchema(Schema):
+    plans = fields.Nested(PlanSchema(exclude= ("savedevents",)))
+
+
+

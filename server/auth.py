@@ -1,10 +1,13 @@
 """Temporary local-only auth adapter; replace with verified JWT auth before release."""
 from functools import wraps
 
-from flask import current_app, g, jsonify
+from flask import current_app, g, jsonify, request, Flask
+import jwt
 
 from models import User
 from extensions import db
+
+app= Flask(__name__)
 
 def require_user(view):
     @wraps(view)
@@ -25,3 +28,5 @@ def require_user(view):
         g.current_user = user
         return view(*args, **kwargs)
     return wrapped
+
+        
