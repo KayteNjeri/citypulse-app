@@ -7,7 +7,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 def utc_now():
     return datetime.now(timezone.utc)
 
-
 class User(db.Model):
     __tablename__ = "users"
 
@@ -29,9 +28,9 @@ class User(db.Model):
         password_hashing = bcrypt.generate_password_hash(
             password.encode('utf-8'))
         self.password_hash = password_hashing.decode('utf-8')
-
+        
     def password_check(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password.encode('utf-8'))
+            return bcrypt.check_password_hash( password, self.password_hash )
 
 
 

@@ -1,10 +1,9 @@
 from flask import Blueprint, request, jsonify, make_response
-from flask_jwt_extended import create_access_token, get_jwt_identity, verify_jwt_in_request, current_user, set_access_cookies
+from flask_jwt_extended import create_access_token, get_jwt_identity, verify_jwt_in_request, jwt_required, current_user
 from models import *
+from auth import require_user
 from extensions import db
 from datetime import timedelta, datetime
-
-#from auth import require_user
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -12,20 +11,21 @@ auth_bp = Blueprint("auth", __name__)
 #api/auth/register - registrtion authentication. validate user, check for duplicates
 #save to postgresql - via user model, return user details and jwt token
 
-@auth_bp.before_request
-def jwt_check():
+@require_user
+def access_verfication():
     access_list = [
           "register",
           "login"
-     ]
-    if (request.endpoint) not in access_list and not (verify_jwt_in_request()):
+        ]
+        
+    if (request.endpoint) not in access_list and (not verify_jwt_in_request()):
           return {"error" : "Unauthorized"}, 401
 
 
+@require_user
 @auth_bp.post("/register")
 def Registration():
-        #verify_jwt_in_request()
-        data = request.get_json() or {}
+        data = request.get_json() 
         #need to validate:
         if not data.get("name") or not data.get("password") or not data.get("email"):
             return jsonify({
@@ -37,16 +37,18 @@ def Registration():
         email = data["email"]
 
         #check for dupe emails and names
-        existing_user = db.session.scalars(db.select(User).where(User.email == email))
-        email_test = db.session.scalars(db.select(User).where(User.name == name))
-
+        existing_user = db.session.query(User.name).select_from(User).filter(User.name == name)
+        existing_email = db.session.query(User.email).select_from(User).filter(User.email == email)
+        print(existing_email)
         existing_user_output = {
-            "message": "An account is already under this email account, try again",
+            "message": "An account is already under this email account or name, try another",
         }
-          
-        if not existing_user or not email_test:
+
+        #still doesn't return output correctly but registration works 
+        if existing_email == email: #or existing_name:
             return jsonify(existing_user_output), 503
 
+    
         user = User(name = name, email = email)
         user.password_hashing = password
         
@@ -55,7 +57,6 @@ def Registration():
 
         new_user = UserSchema().dump(user)
 
-        
         token = create_access_token(identity = str(user.id))
         output = {
             "user": new_user,
@@ -65,15 +66,11 @@ def Registration():
         
         return output
        
-    #unhash the password and match it with the one written
 
-
-
+@require_user
 @auth_bp.post("/login")
 def Login():
-    verify_jwt_in_request()
     data = request.get_json() or {}
-
     name = data["name"]
     password = data["password"]
 
@@ -82,29 +79,32 @@ def Login():
             "message": "Not enough information provided"
         })
 
-    user = User(id = get_jwt_identity(), name = name, password_hash = password)
+    user = User( name = name, password_hash = password)
 
     if user and user.password_check(password):
-         token = create_access_token(identity = str(User.id), expires_delta = datetime.now() + timedelta(hours=1))
-         return token
+        token = create_access_token(identity = str(User.id), expires_delta = datetime.now() + timedelta(hours=3))
 
+        output = {
+            "name": user.name,
+            "token": token,
+            "_message": f"Welcome... {user.name}"
+        }
+        output.set_cookie("token", token)
+
+        return jsonify(output)
     
-    
-    return jsonify({
-         "name": user.name,
-         "token": token,
-         "_message": f"Welcome... {user.name}"
-    })
+    return jsonify({"error": ['Unauthorized'], "reasons": ["Wrong Account", "Wrong Password", "You don't have an account"]}, 401)
     
 @auth_bp.get("/me")
+@jwt_required
 def current_user_verification():
+     return jsonify(id=current_user.id, 
+            name= current_user.name
+        )
         
-    if verify_jwt_in_request():
-        user_id = get_jwt_identity()
-        user = User.query.filter(User.id == user_id).first()
-        return UserSchema().dump(user), 200
-    else:
-        return {"error": "jwt token retrieval error, unauthorized"}, 401
+        #return UserSchema().dump(user), 200
+    
+        #return {"error": "jwt token retrieval error, unauthorized"}, 401
 
 
 
