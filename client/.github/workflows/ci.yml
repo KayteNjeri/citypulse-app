@@ -49,7 +49,7 @@ jobs:
         env:
           POSTGRES_USER: citypulse
           POSTGRES_PASSWORD: citypulse
-          POSTGRES_DB: citypulse_test
+          POSTGRES_DB: citypulse_dev
         ports:
           - 5432:5432
         options: >-
@@ -75,4 +75,4 @@ jobs:
       - name: Run tests against PostgreSQL
         run: pytest
         env:
-          TEST_DATABASE_URL: postgresql+psycopg://citypulse:citypulse@localhost:5432/citypulse_test
+          TEST_DATABASE_URL: postgresql+psycopg://citypulse:citypulse@localhost:5432/citypulse_dev
