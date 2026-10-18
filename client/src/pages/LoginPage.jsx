@@ -6,7 +6,7 @@ import { redirectAfterAuth } from '../auth/redirectAfterAuth'
 import AuthLayout from './AuthLayout'
 import FormField from './FormField'
 
-function LoginPage() {
+function LoginPage({loggingIn}) {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   // Set by TicketLink when a logged-out user tried to buy tickets.
@@ -31,7 +31,22 @@ function LoginPage() {
 
     setSubmitting(true)
     try {
-      await login(values)
+      await login(values) 
+    
+      fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type" : "application/json",
+      },
+      body: JSON.stringify({values}),
+        }).then((response) => {
+      if (response.ok) {
+        response.json().then((token, user) => loggingIn(token, user));
+      } else {
+        response.json().then((error) => setErrors(error.errors));
+      }
+        });
+
       redirectAfterAuth(navigate, redirect)
     } catch (err) {
       setFormError(err.message)

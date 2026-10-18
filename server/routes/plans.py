@@ -234,7 +234,7 @@ def list_plan_events(plan_id):
     plan, failure = get_owned_plan(plan_id)
     if failure:
         return failure
-    return jsonify(data=[event.serialize() for event in plan.saved_events]), 200
+    return jsonify([event.serialize() for event in plan.saved_events]), 200
 
 
 @plans_bp.post("/<int:plan_id>/events")
