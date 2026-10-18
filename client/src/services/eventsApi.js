@@ -10,7 +10,7 @@ const BASE_URL = (
 
 
 // Increase from 10000 to 45000 (45 seconds) to accommodate Render cold starts
-const REQUEST_TIMEOUT_MS = 48000
+const REQUEST_TIMEOUT_MS = 90000
 
 export async function fetchEvents({ city, category, startDate, endDate, keyword } = {}) {
   const params = new URLSearchParams()
