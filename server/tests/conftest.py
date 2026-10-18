@@ -4,6 +4,7 @@ from extensions import db
 
 
 class TestConfig:
+    
     TESTING = True
     SECRET_KEY = "test-only-secret"
     SQLALCHEMY_DATABASE_URI = "sqlite://"

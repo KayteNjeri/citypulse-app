@@ -9,22 +9,26 @@ from models import User
 from extensions import db
 
 app= Flask(__name__)
+#app.config["JWT_SECRET_KEY"] = "test_key"
 
 def require_user(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         token = request.cookies.get('token')
 
-        if not token:
-            return jsonify({"msg": "No token available - Unauthorized"}), 401
+        if not current_app.config.get("SECRET_KEY", False):
+            return jsonify(error={
+                            "message": "Data not available",
+                        }), 503
+        else:
+            try:
+                data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+                current_user = User.query.filter(name=data["name"]).first()
+            except:
+                return jsonify({"msg": "Token Unavailable, Please log in!"}), 401
+            
+        user = db.session.get(User,current_app.config["DEV_AUTH_USER_ID"])
 
-        try:
-            data = jwt.decode(token, app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
-            current_user = User.query.filter_by(id = data["id"]).all()
-        except:
-            return jsonify({"msg": "Invalid Token!!!!!"}), 401
-
-        user = db.session.get(User, current_app.config["JWT_SECRET_KEY"])
         if user is None:
             return jsonify(error={
                 "code": "dev_user_missing",
@@ -32,7 +36,8 @@ def require_user(view):
             }), 503
         g.current_user = user
 
-        return view( *args, **kwargs)
+        return view(current_user, *args, **kwargs)
     return wrapped
+
 
         

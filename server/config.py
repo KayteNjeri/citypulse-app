@@ -20,5 +20,5 @@ class Config:
     ).split(",") if origin.strip()]
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     # Temporary development-only auth bridge. Disable outside local development.
-    DEV_AUTH_STUB = os.getenv("DEV_AUTH_STUB", "false").lower() == "true"
+    #DEV_AUTH_STUB = os.getenv("DEV_AUTH_STUB", "false").lower() == "true"
     DEV_AUTH_USER_ID = int(os.getenv("DEV_AUTH_USER_ID", "1"))

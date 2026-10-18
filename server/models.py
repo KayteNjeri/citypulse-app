@@ -13,7 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(256), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
 
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
     plans = db.relationship("Plan", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
@@ -24,14 +24,15 @@ class User(db.Model):
         raise Exception('Password hashes may not be viewed.')
 
     @password_hashing.setter
-    def password_hashing(self, password):
-        password_hashing = bcrypt.generate_password_hash(
-            password.encode('utf-8'))
-        self.password_hash = password_hashing.decode('utf-8')
+    def password_hash(self, password):
+        password_hash = bcrypt.generate_password_hash(password.encode('utf-8'))
+        self._password_hash = password_hash.decode('utf-8')
         
     def password_check(self, password):
-            return bcrypt.check_password_hash( password, self.password_hash )
+        return bcrypt.check_password_hash( self._password_hash, password.encode('utf-8') )
 
+    def __repr__(self):
+        return f'User {self.name}'
 
 
 class Plan(db.Model):
