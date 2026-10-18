@@ -12,6 +12,10 @@ import { useAdminEvents } from './admin/adminEventsContext'
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
+import { useAuth } from './auth/authContext'
+import AuthProvider from './auth/AuthProvider'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import LoginPage from './pages/LoginPage'
 
 // Case- and space-insensitive text, so "Music", "music " and "MUSIC" match each other.
 const norm = (value) => (value || '').trim().toLowerCase()
@@ -38,7 +42,19 @@ function matchesQuery(event, query) {
     .some((field) => field.toLowerCase().includes(q))
 }
 
+
+export const loggingIn = (data) => {
+    const {tokenExpiryTime} = useAuth();
+
+    const {token} = data;
+    const decoded_token = jwtDecode(token);
+    const token_exp = decoded_token.expiry * 100
+
+    localStorage.setItem("token", token)
+    tokenExpiryTime(token_exp)
+  }
 function App() {
+
   const [query, setQuery] = useState(() => {
     const search = localStorage.getItem("query");
     //const value = JSON.parse(search);
@@ -51,12 +67,13 @@ function App() {
   // One sort at a time: 'all' (default order), a price sort, or a date sort.
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.none)
 
-  //Track saved event IDs for teh heart-button interaction
+  //Track saved event IDs for the heart-button interaction
   const [savedEventIds, setSavedEventIds] = useState([])
 
   //Track events currently being saved
   const [savingEventIds, setSavingEventIds] = useState([])
 
+  const [user, setUser] = useState(null)
 
   // Role 4: Event Detail Modal state management
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -67,7 +84,7 @@ function App() {
   // See src/services/eventsApi.js — tries Ticketmaster first, falls back
   // to mockEvents internally if the live call fails. App.jsx just renders
   // whatever comes back, without needing to know which source it was.
-const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
+  const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
   // Events added in the admin portal are listed first, ahead of the live/sample events.
   const { events: adminEvents } = useAdminEvents()
   // Skip API/sample events that are already in the admin list (same id), so nothing shows twice.
@@ -76,6 +93,18 @@ const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
   useEffect(() => {
     localStorage.setItem(query, query)
   }, [query])
+
+  useEffect(()=> {
+    fetch("/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    }).then((request) => {
+      if (request.ok) {
+        request.json().then((user) => setUser(user))
+      }
+    })
+  }, []);
   
   useEffect(() => {
     fetchEvents({})
@@ -184,6 +213,7 @@ const { events: apiEvents, loading: apiLoading, fetchEvents } = useEvents()
         <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
         <h2 className="app__section-title" ref={resultsRef}>Upcoming events</h2>
         <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal} savedEventIds={savedEventIds} savingEventIds={savingEventIds} onToggleSave={handleToggleSave}/>
+        
 
         {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
       </main>

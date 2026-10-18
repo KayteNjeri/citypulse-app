@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AuthContext } from './authContext'
 import { hashPassword, normalizeEmail } from './authUtils'
 
@@ -24,7 +25,7 @@ function writeJSON(key, value) {
   }
 }
 
-function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   // Restores the logged-in user after a page refresh.
   const [user, setUser] = useState(() => readJSON(SESSION_KEY, null))
 
@@ -35,7 +36,37 @@ function AuthProvider({ children }) {
     return session
   }, [])
 
-  const signup = useCallback(
+  const navi = useNavigate()
+  let tokenExpiry;
+
+  const tokenExpiryTime = (expTime) => {
+    clearTimeout(tokenExpiry);
+    const expiryTime = expTime - Date.now()
+
+    if (expiryTime > 60000) {
+      tokenExpiry = setTimeout(() => {
+        Refresh();
+      }, expiryTime - 60000)
+    } else {
+      navi("/login")
+    }
+  }
+  const Refresh = () =>
+    fetch("/me", {
+      method: "GET",
+    }).then(response => {
+
+      if (!response.ok) throw new Error("Token Unavailable");
+      return response.json()
+
+    }).then(({token, expiry}) => {
+
+      localStorage.setItem("token", token);
+      tokenExpiryTime(expiry * 100);
+
+    }).catch (() => navi("/login"))
+
+    const signup = useCallback(
     async ({ name, email, password }) => {
       const users = readJSON(USERS_KEY, [])
       const normalized = normalizeEmail(email)
@@ -52,7 +83,6 @@ function AuthProvider({ children }) {
     },
     [startSession],
   )
-
   const login = useCallback(
     async ({ email, password }) => {
       const normalized = normalizeEmail(email)

@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
-import App from './App.jsx'
+import App, {loggingIn} from './App.jsx'
 import AuthProvider from './auth/AuthProvider.jsx'
 import AdminEventsProvider from './admin/AdminEventsProvider.jsx'
 import AdminPage from './pages/AdminPage.jsx'
@@ -23,8 +23,8 @@ createRoot(document.getElementById('root')).render(
         <AdminEventsProvider>
         <Routes>
           <Route path="/" element={<App />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage loggingIn={loggingIn} />} />
+          <Route path="/signup" element={<SignupPage loggingIn={loggingIn} />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/pay/:eventId" element={<PaymentPage />} />
           <Route path="/my-tickets" element={<MyTicketsPage />} />
