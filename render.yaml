@@ -4,8 +4,7 @@ services:
     runtime: python
     rootDir: server
     plan: free
-    buildCommand: pip install -r requirements.txt
-    preDeployCommand: flask --app app db upgrade
+    buildCommand: pip install -r requirements.txt && flask --app app db upgrade
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 app:app
     healthCheckPath: /api/health
     envVars:
@@ -37,6 +36,7 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://citypulse-api.onrender.com/api
+
 databases:
   - name: citypulse-db
     databaseName: citypulse
