@@ -57,3 +57,7 @@ The temporary local auth bridge is controlled by `DEV_AUTH_STUB=true`. It does n
 - Stephen should add the `/api/events` Ticketmaster proxy and related tests.
 - Align the schema and response shapes with the team before merging. `data` wraps successful JSON payloads; errors use `{ "error": { "code": "...", "message": "..." } }`.
 - The test suite uses SQLite in memory; CI should also run an integration job against PostgreSQL.
+
+## Deployment
+
+* find the app deployed at: https://citypulse-web.onrender.com
