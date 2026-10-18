@@ -8,6 +8,8 @@ from extensions import db
 from routes.health import health_bp
 from routes.plans import plans_bp
 from routes.auth import auth_bp
+from routes.events import events_bp 
+
 
 def create_app(config_object=Config):
     app = Flask(__name__)
@@ -26,6 +28,7 @@ def create_app(config_object=Config):
     app.register_blueprint(plans_bp, url_prefix="/api/plans")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
+    app.register_blueprint(events_bp, url_prefix="/api/events")  
 
     @app.errorhandler(404)
     def not_found(_error):

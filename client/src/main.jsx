@@ -5,9 +5,12 @@ import './index.css'
 import App, {loggingIn} from './App.jsx'
 import AuthProvider from './auth/AuthProvider.jsx'
 import AdminEventsProvider from './admin/AdminEventsProvider.jsx'
+import SavedEventsProvider from './plans/SavedEventsProvider.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import PaymentPage from './pages/PaymentPage.jsx'
 import MyTicketsPage from './pages/MyTicketsPage.jsx'
+import MyPlansPage from './pages/MyPlansPage.jsx'
+import PlanDetailsPage from './pages/PlanDetailsPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SignupPage from './pages/SignupPage.jsx'
 import About from './pages/About.jsx'
@@ -21,6 +24,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <AdminEventsProvider>
+        <SavedEventsProvider>
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/login" element={<LoginPage loggingIn={loggingIn} />} />
@@ -28,6 +32,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/pay/:eventId" element={<PaymentPage />} />
           <Route path="/my-tickets" element={<MyTicketsPage />} />
+          <Route path="/plans" element={<MyPlansPage />} />
+          <Route path="/plans/:planId" element={<PlanDetailsPage />} />
           <Route path="/about-us" element={<About />} />
           <Route path="/contact-us" element={<Contact />} />
           <Route path="/privacy-policy" element={<Privacy />} />
@@ -35,6 +41,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/cookies" element={<Cookies />} />
           <Route path="*" element={<App />} />
         </Routes>
+        </SavedEventsProvider>
         </AdminEventsProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -9,6 +9,7 @@ import { getNextEvent } from './utils/nextEvent'
 import { SORT_OPTIONS, sortEvents } from './utils/sortEvents'
 import { useEvents } from './utils/useEvents'
 import { useAdminEvents } from './admin/adminEventsContext'
+import { useSavedEvents } from './plans/savedEventsContext'
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
@@ -67,11 +68,8 @@ function App() {
   // One sort at a time: 'all' (default order), a price sort, or a date sort.
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.none)
 
-  //Track saved event IDs for the heart-button interaction
-  const [savedEventIds, setSavedEventIds] = useState([])
-
-  //Track events currently being saved
-  const [savingEventIds, setSavingEventIds] = useState([])
+  // Heart buttons: saved state comes from the Plans API ("Want to go" plan by default).
+  const { savedIds: savedEventIds, savingIds: savingEventIds, isSaved, isSaving, toggleSave } = useSavedEvents()
 
   const [user, setUser] = useState(null)
 
@@ -121,19 +119,6 @@ function App() {
   }
 
   // Toggle the saved state of an event by its ID. If the event is already saved, remove it from the saved list; otherwise, add it to the saved list.
-  const handleToggleSave = (event) => {
-    const eventId = event.id
-
-    if (eventId === undefined || eventId === null) {
-      console.error("Cannot save event without a valid ID:", event)
-      return
-    }
-    setSavedEventIds((prevSavedEventIds) => 
-      prevSavedEventIds.includes(eventId)
-        ? prevSavedEventIds.filter((id) => id !== eventId)
-        : [...prevSavedEventIds, eventId]
-    )
-  }
 
   // NEW CHANGE: Replaced mockEvents with apiEvents to get the data from API
   // TODO: replace mockEvents with Ticketmaster results (map through normalizeEvent),
@@ -210,10 +195,15 @@ function App() {
             startDate={startDate} setStartDate={setStartDate}
             endDate={endDate} setEndDate={setEndDate} filtered={events} clearFilters={clearFilters} />
         </section>
-        <FeaturedBanner event={nextEvent} onSelect={handleOpenModal}/>
+        <FeaturedBanner
+          event={nextEvent}
+          onSelect={handleOpenModal}
+          saved={nextEvent ? isSaved(nextEvent.id) : false}
+          saving={nextEvent ? isSaving(nextEvent.id) : false}
+          onToggleSave={toggleSave}
+        />
         <h2 className="app__section-title" ref={resultsRef}>Upcoming events</h2>
-        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal} savedEventIds={savedEventIds} savingEventIds={savingEventIds} onToggleSave={handleToggleSave}/>
-        
+        <EventGrid events={events} loading={apiLoading} onEventClick={handleOpenModal} savedEventIds={savedEventIds} savingEventIds={savingEventIds} onToggleSave={toggleSave}/>
 
         {/* Pass onEventClick handler so Role 3 (EventGrid/Cards) can trigger your modal */}
       </main>

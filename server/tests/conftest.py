@@ -12,6 +12,7 @@ class TestConfig:
     CORS_ORIGINS = ["http://localhost:5173"]
     DEV_AUTH_STUB = True
     DEV_AUTH_USER_ID = 1
+    TICKETMASTER_API_KEY = "test-key"  
 
 
 @pytest.fixture()
