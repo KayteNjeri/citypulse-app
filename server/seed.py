@@ -14,9 +14,8 @@ with app.app_context():
     print("Database tables created and previous data wiped.")
     user = User.query.filter_by(email="david.local@example.test").first()
     if user is None:
-        user = User(name="Local Developer", email="david.local@example.test",
-        password_hash="test") #password is "$2b$12$ulGcdjk9BPyrcyi86IrM3OLGh1fp9zbx18zvEw1VDP.SjYoHJ1dgK"
-
+        user = User(name="Local Developer", email="david.local@example.test", password_hash="")
+        user.set_password("test-password-change-me")
         db.session.add(user)
         db.session.commit()
 

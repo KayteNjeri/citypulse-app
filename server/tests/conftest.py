@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from app import create_app
 from extensions import db
@@ -7,7 +9,7 @@ class TestConfig:
     
     TESTING = True
     SECRET_KEY = "test-only-secret"
-    SQLALCHEMY_DATABASE_URI = "sqlite://"
+    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL", "sqlite://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CORS_ORIGINS = ["http://localhost:5173"]
     DEV_AUTH_STUB = True

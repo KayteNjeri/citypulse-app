@@ -7,7 +7,7 @@ import AuthLayout from './AuthLayout'
 import FormField from './FormField'
 
 
-function SignupPage({loggingIn}) {
+function SignupPage() {
   const { user, signup } = useAuth()
   const navigate = useNavigate()
   // Carried over from /login so the pending ticket purchase survives switching pages.
@@ -33,20 +33,6 @@ function SignupPage({loggingIn}) {
     setSubmitting(true)
     try {
       await signup(values)
-
-      fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type" : "application/json",
-      },
-      body: JSON.stringify({values}),
-    }).then((test) => {
-      if (test.ok) {
-        test.json().then((user, token) => loggingIn(token, user));
-      } else {
-        test.json().then((error) => setErrors(error.errors));
-      }
-    });
 
       redirectAfterAuth(navigate, redirect)
     } catch (err) {

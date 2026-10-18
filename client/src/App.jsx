@@ -13,10 +13,6 @@ import { useSavedEvents } from './plans/savedEventsContext'
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
-import { useAuth } from './auth/authContext'
-import AuthProvider from './auth/AuthProvider'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
 
 // Case- and space-insensitive text, so "Music", "music " and "MUSIC" match each other.
 const norm = (value) => (value || '').trim().toLowerCase()
@@ -44,16 +40,7 @@ function matchesQuery(event, query) {
 }
 
 
-export const loggingIn = (data) => {
-    const {tokenExpiryTime} = useAuth();
 
-    const {token} = data;
-    const decoded_token = jwtDecode(token);
-    const token_exp = decoded_token.expiry * 100
-
-    localStorage.setItem("token", token)
-    tokenExpiryTime(token_exp)
-  }
 function App() {
 
   const [query, setQuery] = useState(() => {
@@ -71,7 +58,6 @@ function App() {
   // Heart buttons: saved state comes from the Plans API ("Want to go" plan by default).
   const { savedIds: savedEventIds, savingIds: savingEventIds, isSaved, isSaving, toggleSave } = useSavedEvents()
 
-  const [user, setUser] = useState(null)
 
   // Role 4: Event Detail Modal state management
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -89,21 +75,10 @@ function App() {
   const adminIds = new Set(adminEvents.map((e) => e.id))
   const allEvents = [...adminEvents, ...apiEvents.filter((e) => !adminIds.has(e.id))]
   useEffect(() => {
-    localStorage.setItem(query, query)
+    localStorage.setItem('query', query)
   }, [query])
 
-  useEffect(()=> {
-    fetch("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    }).then((request) => {
-      if (request.ok) {
-        request.json().then((user) => setUser(user))
-      }
-    })
-  }, []);
-  
+
   useEffect(() => {
     fetchEvents({})
   }, [fetchEvents])

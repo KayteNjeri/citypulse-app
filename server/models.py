@@ -2,7 +2,6 @@
 from datetime import datetime, timezone, date
 from extensions import db, bcrypt
 from marshmallow import Schema, fields
-from sqlalchemy.ext.hybrid import hybrid_property
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -18,18 +17,11 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
     plans = db.relationship("Plan", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
 
-    #password hashing
-    @hybrid_property
-    def password_hashing(self):
-        raise Exception('Password hashes may not be viewed.')
+    def set_password(self, password):
+        self.password_hash = bcrypt.generate_password_hash(password.encode("utf-8")).decode("utf-8")
 
-    @password_hashing.setter
-    def password_hash(self, password):
-        password_hash = bcrypt.generate_password_hash(password.encode('utf-8'))
-        self._password_hash = password_hash.decode('utf-8')
-        
     def password_check(self, password):
-        return bcrypt.check_password_hash( self._password_hash, password.encode('utf-8') )
+        return bcrypt.check_password_hash(self.password_hash, password.encode("utf-8"))
 
     def __repr__(self):
         return f'User {self.name}'

@@ -1,10 +1,13 @@
 // src/services/eventsApi.js
 import { mockEvents } from '../data/mockEvents.js'
 
-const BASE_URL =
+const BASE_URL = (
+  import.meta.env?.VITE_API_URL ??
   import.meta.env?.VITE_API_BASE_URL ??
-  globalThis.process?.env?.VITE_API_BASE_URL ??
-  'http://localhost:5001'
+  globalThis.process?.env?.VITE_API_URL ??
+  'http://localhost:5001/api'
+).replace(/\/$/, '')
+
 
 const REQUEST_TIMEOUT_MS = 10000
 
@@ -17,7 +20,7 @@ export async function fetchEvents({ city, category, startDate, endDate, keyword 
   if (endDate) params.append('endDate', endDate)
 
   try {
-    const response = await fetch(`${BASE_URL}/api/events?${params.toString()}`, {
+    const response = await fetch(`${BASE_URL}/events?${params.toString()}`, {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
     const body = await response.json()
