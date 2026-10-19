@@ -42,12 +42,30 @@ def fetch_events(keyword=None, city=None, category=None, start_date=None, end_da
     except requests.RequestException as exc:
         raise TicketmasterError(f"Could not reach Ticketmaster: {exc}", code="network_error") from exc
 
+    
     if not response.ok:
-        raise TicketmasterError(f"Ticketmaster returned {response.status_code}", code="upstream_error")
+        raise TicketmasterError(
+            f"Ticketmaster returned HTTP {response.status_code}",
+            code="upstream_error",
+        )
 
-    raw = response.json()
+    try:
+        raw = response.json()
+    except requests.exceptions.JSONDecodeError as exc:
+        raise TicketmasterError(
+            "Ticketmaster returned an invalid JSON response",
+            code="invalid_upstream_response",
+        ) from exc
+
+    if not isinstance(raw, dict):
+        raise TicketmasterError(
+            "Ticketmaster returned an unexpected response format",
+            code="invalid_upstream_response",
+        )
+
     events = raw.get("_embedded", {}).get("events", [])
     return [normalize_event(event) for event in events]
+
 
 
 def normalize_event(raw):
