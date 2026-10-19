@@ -10,7 +10,7 @@ const BASE_URL = (
 
 
 // Increase from 10000 to 45000 (45 seconds) to accommodate Render cold starts
-const REQUEST_TIMEOUT_MS = 90000
+const REQUEST_TIMEOUT_MS = 52000
 
 export async function fetchEvents({ city, category, startDate, endDate, keyword } = {}) {
   const params = new URLSearchParams()
@@ -58,3 +58,5 @@ function filterMockEvents({ city, category, startDate, endDate, keyword }) {
     return matchesCity && matchesCategory && matchesKeyword && matchesStart && matchesEnd
   })
 }
+console.log('Current BASE_URL:', BASE_URL)
+
