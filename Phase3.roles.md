@@ -1,0 +1,8 @@
+| Person | Role | Takes |
+| :--- | :--- | :--- |
+| **Karimi** | Search UI Lead | Forgot password. Add the link, a reset-request page, a reset page and a reset API. This also needs a small email-sending service. Fake emails. Require email verification at signup. Sandbox account. Seed a demo login for testers. |
+| **Stephen** | API & Data Engineer | Payment. Add M-PESA Express (STK push) tested in Safaricom’s Daraja sandbox, on the backend, and hook PaymentPage up to it. Generic and past events at the API level. Default to upcoming events only and use the default city. |
+| **Amina** | State & Storage Lead | Tickets in the database. Add a Ticket model so purchases leave localStorage. Transferable vs non-transferable. Add a transferable flag, a transfer endpoint and the ownership rules. |
+| **Heidi** | Event Grid Lead | Past-event message. Show a “This event has passed” banner on cards, the modal and the featured banner, and disable “Get tickets” for past events. Generic feed. Add a “Recommended for you” row based on saved events and categories. |
+| **Kayte** | UI Layout Lead | PWA. Add a manifest, service worker, icons, an install prompt and an offline page. Reminder settings UI. Add a notification preferences screen and an in-app reminder display. |
+| **David** | Scrum Master / Lead | Add to calendar. Add an .ics download and a Google Calendar link in the modal. Reminder scheduler. Run a daily job that sends reminders for upcoming events. Also sprint planning, PR reviews and README updates. |
