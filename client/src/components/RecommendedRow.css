@@ -1,0 +1,41 @@
+.recommended {
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.recommended__header {
+  margin-bottom: 16px;
+}
+
+.recommended .recommended__title {
+  margin-bottom: 4px;
+}
+
+.recommended__reason {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* One row that scrolls sideways, snapping card by card. */
+.recommended__row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 250px);
+  gap: 18px;
+  margin: 0;
+  padding: 4px 4px 12px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+
+  @media (max-width: 640px) {
+    grid-auto-columns: 80%;
+    gap: 14px;
+  }
+}
+
+.recommended__item {
+  scroll-snap-align: start;
+}
