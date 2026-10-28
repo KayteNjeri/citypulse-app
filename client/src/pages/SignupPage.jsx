@@ -27,20 +27,19 @@ function SignupPage() {
     const found = validateSignup(values)
     setErrors(found)
     setFormError('')
-    if (Object.keys(found).length) return
+    if (Object.keys(found).length) return;
     
-  
     setSubmitting(true)
     try {
-      await signup(values)
-
-      redirectAfterAuth(navigate, redirect)
+      const result = await signup(values)
+      const emailToVerify = result?.email || values.email
+      navigate(`/verify-email?email=${encodeURIComponent(emailToVerify)}`, {replace: true})
     } catch (err) {
-      setFormError(err.message)
-      setSubmitting(false)
+      setFormError(err.message || "Signup Failed")
+    } finally {
+      setSubmitting(false);
     }
-  }
-
+  };
   return (
     <AuthLayout
       title="Create an account"

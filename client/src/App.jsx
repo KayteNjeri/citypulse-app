@@ -14,6 +14,7 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
 
+
 // Case- and space-insensitive text, so "Music", "music " and "MUSIC" match each other.
 const norm = (value) => (value || '').trim().toLowerCase()
 
