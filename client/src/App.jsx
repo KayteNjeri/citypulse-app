@@ -11,6 +11,9 @@ import { useEvents } from './utils/useEvents'
 import { useAdminEvents } from './admin/adminEventsContext'
 import { useSavedEvents } from './plans/savedEventsContext'
 import { useState, useEffect, useRef } from 'react'
+import useOnlineStatus from './hooks/useOnlineStatus'
+import OfflinePage  from './pages/OfflinePage'
+import InstallPrompt from './components/InstallPrompt'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
 
@@ -42,6 +45,8 @@ function matchesQuery(event, query) {
 
 
 function App() {
+  //call the hook
+  const isOnline = useOnlineStatus()
 
   const [query, setQuery] = useState(() => {
     const search = localStorage.getItem("query");
@@ -129,10 +134,15 @@ function App() {
   // Sorting applies to all filtered events; with no sort chosen, admin events stay first.
   const events = sortEvents(filtered, sortBy)
 
+  //when the browser is offline, show the offline page instead of the app
+  if (!isOnline) {
+    return <OfflinePage />
+  }
 
   return (
     <>
       <NavBar />
+      <InstallPrompt />
       <main className="app">
         <h1 className="visually-hidden">Group2 events</h1>
         <section className="filters" aria-label="Filter events">
