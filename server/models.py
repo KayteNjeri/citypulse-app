@@ -21,6 +21,7 @@ class User(db.Model):
 
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
     plans = db.relationship("Plan", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    reminder_preference = db.relationship("ReminderPreference", back_populates="user", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password.encode("utf-8")).decode("utf-8")
@@ -92,6 +93,25 @@ class SavedEvent(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
 
     plan = db.relationship("Plan", back_populates="saved_events")
+
+class ReminderPreference(db.Model):
+    __tablename__ = "reminder_preferences"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+
+    enabled = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
+    minutes_before = db.Column(db.Integer, nullable=False, default=60, server_default="60")
+    updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+    user = db.relationship("User", back_populates="reminder_preference")
+
+    def serialize(self):
+        return {
+            "enabled": self.enabled,
+            "minutes_before": self.minutes_before,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
+        }
 
     @property
     def is_past(self):
