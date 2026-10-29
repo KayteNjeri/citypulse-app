@@ -82,6 +82,42 @@ function PaymentPage() {
     }
   }, [stkState, paymentId])
 
+    const option = options.find((o) => o.id === optionId) ?? options[0]
+  const total = option ? option.price * quantity : null
+  const currency = event?.currency || 'KES'
+
+  // Confirms the payment: shows the success screen and logs the purchase for the admin portal.
+  const completePurchase = (mpesaCode, extra = {}) => {
+    const record = {
+      receiptNo: newReceiptNumber(),
+      paidAt: new Date().toISOString(),
+      buyerName: user.name,
+      buyerEmail: user.email,
+      eventId: event.id,
+      eventName: event.name,
+      eventDate: event.date,
+      eventTime: event.time,
+      eventVenue: event.venue,
+      eventCity: event.city,
+      ticketType: option.label,
+      quantity,
+      unitPrice: option.price,
+      total,
+      currency,
+      method: mpesaCode === 'FREE' ? 'Free' : 'M-PESA',
+      mpesaCode: mpesaCode === 'FREE' ? null : mpesaCode,
+      paidTo: mpesaCode === 'FREE' ? null : MPESA_NUMBER_DISPLAY,
+      ...extra,
+    }
+    recordPurchase(record)
+    setPurchase(record)
+  }
+
+  // Keep the ref pointing at the latest completePurchase (updated after each render, never during it).
+  useEffect(() => {
+    completeRef.current = completePurchase
+  })
+
   // Buying tickets needs an account (same rule as "Get tickets").
   if (!user) return <Navigate to="/login" replace state={{ from: `/pay/${eventId}`, eventName: event?.name }} />
 
@@ -106,9 +142,6 @@ function PaymentPage() {
     )
   }
 
-  const option = options.find((o) => o.id === optionId) ?? options[0]
-  const total = option ? option.price * quantity : null
-  const currency = event.currency || 'KES'
   const summary = (
     <div className="pay__event">
       {event.image && <img className="pay__thumb" src={event.image} alt="" />}
@@ -195,33 +228,6 @@ function PaymentPage() {
       // Clipboard blocked: the number is visible to copy by hand.
     }
   }
-
-    const completePurchase = (mpesaCode, extra = {}) => {
-    const record = {
-      receiptNo: newReceiptNumber(),
-      paidAt: new Date().toISOString(),
-      buyerName: user.name,
-      buyerEmail: user.email,
-      eventId: event.id,
-      eventName: event.name,
-      eventDate: event.date,
-      eventTime: event.time,
-      eventVenue: event.venue,
-      eventCity: event.city,
-      ticketType: option.label,
-      quantity,
-      unitPrice: option.price,
-      total,
-      currency,
-      method: mpesaCode === 'FREE' ? 'Free' : 'M-PESA',
-      mpesaCode: mpesaCode === 'FREE' ? null : mpesaCode,
-      paidTo: mpesaCode === 'FREE' ? null : MPESA_NUMBER_DISPLAY,
-      ...extra,
-    }
-    recordPurchase(record)
-    setPurchase(record)
-  }
-  completeRef.current = completePurchase
 
   const busy = stkState === 'sending' || stkState === 'waiting'
 
