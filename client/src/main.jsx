@@ -13,11 +13,16 @@ import MyPlansPage from './pages/MyPlansPage.jsx'
 import PlanDetailsPage from './pages/PlanDetailsPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import SignupPage from './pages/SignupPage.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import VerifyCode from './pages/VerifyCode.jsx'
+import NewPassword from './pages/ResetPassword.jsx'
+import ResetSuccess from './pages/ResetSuccess.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
 import Terms from './pages/Terms.jsx'
 import Cookies from './pages/Cookies.jsx'
+import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -29,6 +34,11 @@ createRoot(document.getElementById('root')).render(
           <Route path="/" element={<App />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-code" element={<VerifyCode/>}/>
+          <Route path="/verify-email" element={<VerifyEmailPage/>}/>
+          <Route path="/reset-password" element={<NewPassword />} />
+          <Route path="/reset-success" element={<ResetSuccess/>}/>
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/pay/:eventId" element={<PaymentPage />} />
           <Route path="/my-tickets" element={<MyTicketsPage />} />
