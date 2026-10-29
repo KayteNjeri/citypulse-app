@@ -23,12 +23,8 @@ import Contact from './pages/Contact.jsx'
 import Privacy from './pages/Privacy.jsx'
 import Terms from './pages/Terms.jsx'
 import Cookies from './pages/Cookies.jsx'
-<<<<<<< HEAD
 import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
-
-=======
 import NotificationSettings from './pages/NotificationSettings.jsx'
->>>>>>> 0ab205b (Notification settings)
 
 registerSW({ immediate: true })
 
