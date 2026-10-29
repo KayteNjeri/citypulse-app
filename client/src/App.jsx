@@ -5,12 +5,17 @@ import NavBar from './components/NavBar'
 import SearchBar from './components/SearchBar'
 import Footer from './components/Footer'
 import EventDetailModal from './components/EventDetailModal'
+import RecommendedRow from './components/RecommendedRow'
 import { getNextEvent } from './utils/nextEvent'
+import { recommendationReason, recommendEvents } from './utils/recommendations'
 import { SORT_OPTIONS, sortEvents } from './utils/sortEvents'
 import { useEvents } from './utils/useEvents'
 import { useAdminEvents } from './admin/adminEventsContext'
 import { useSavedEvents } from './plans/savedEventsContext'
 import { useState, useEffect, useRef } from 'react'
+import useOnlineStatus from './hooks/useOnlineStatus'
+import OfflinePage  from './pages/OfflinePage'
+import InstallPrompt from './components/InstallPrompt'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
 
@@ -52,6 +57,8 @@ function matchesQuery(event, query) {
 
 
 function App() {
+  //call the hook
+  const isOnline = useOnlineStatus()
 
   const [query, setQuery] = useState(() => {
     const search = localStorage.getItem("query");
@@ -67,7 +74,7 @@ function App() {
   const [sortBy, setSortBy] = useState(SORT_OPTIONS.none)
 
   // Heart buttons: saved state comes from the Plans API ("Want to go" plan by default).
-  const { savedIds: savedEventIds, savingIds: savingEventIds, isSaved, isSaving, toggleSave } = useSavedEvents()
+  const { savedIds: savedEventIds, savedEvents, savingIds: savingEventIds, isSaved, isSaving, toggleSave } = useSavedEvents()
 
 
   // Role 4: Event Detail Modal state management
@@ -147,10 +154,21 @@ function App() {
   // Sorting applies to all filtered events; with no sort chosen, admin events stay first.
   const events = sortEvents(filtered, sortBy)
 
+  //when the browser is offline, show the offline page instead of the app
+  if (!isOnline) {
+    return <OfflinePage />
+  }
+  // "Recommended for you": based on the categories and cities of saved events. Hidden while
+  // searching or filtering, so it doesn't push the results down.
+  const filtering = Boolean(query.trim() || city || startDate || endDate) || category !== 'all'
+  const recommended =
+    filtering || apiLoading ? [] : recommendEvents(allEvents, savedEvents, { excludeIds: nextEvent ? [nextEvent.id] : [] })
+
 
   return (
     <>
       <NavBar />
+      <InstallPrompt />
       <main className="app">
         <h1 className="visually-hidden">Group2 events</h1>
         <section className="filters" aria-label="Filter events">
@@ -193,6 +211,14 @@ function App() {
           onSelect={handleOpenModal}
           saved={nextEvent ? isSaved(nextEvent.id) : false}
           saving={nextEvent ? isSaving(nextEvent.id) : false}
+          onToggleSave={toggleSave}
+        />
+        <RecommendedRow
+          events={recommended}
+          reason={recommendationReason(savedEvents)}
+          onEventClick={handleOpenModal}
+          savedEventIds={savedEventIds}
+          savingEventIds={savingEventIds}
           onToggleSave={toggleSave}
         />
         <h2 className="app__section-title" ref={resultsRef}>Upcoming events</h2>
