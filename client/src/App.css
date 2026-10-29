@@ -117,3 +117,9 @@
   scroll-margin-top: 100px;
   text-align: left;
 }
+
+/* Dropdown list items: black text on a white background */
+select option {
+  color: #000;
+  background: #fff;
+}

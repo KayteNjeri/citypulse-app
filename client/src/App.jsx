@@ -16,6 +16,16 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import DateFilterBar from './components/DateFilterBar'
 
+function todayLocal() {
+  const d = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+const DEFAULT_CITY = import.meta.env?.VITE_DEFAULT_CITY || ''
+// Always offered in the city dropdown, even if the current feed has none of that city's events.
+const CITY_OPTIONS = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Las Vegas', 'San Fransisco', 'Foxborough', 'Brooklyn']
+
 // Case- and space-insensitive text, so "Music", "music " and "MUSIC" match each other.
 const norm = (value) => (value || '').trim().toLowerCase()
 
@@ -51,7 +61,8 @@ function App() {
     return search || "";
   })
   const [category, setCategory] = useState('all')
-  const [city, setCity] = useState('')
+  // First load: the user's last city, otherwise the default city from .env.
+  const [city, setCity] = useState(() => localStorage.getItem('city') ?? DEFAULT_CITY)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   // One sort at a time: 'all' (default order), a price sort, or a date sort.
@@ -80,10 +91,19 @@ function App() {
     localStorage.setItem('query', query)
   }, [query])
 
+    useEffect(() => {
+    localStorage.setItem('city', city)
+  }, [city])
 
+  // City and category filters ask the API, not just the events already loaded.
   useEffect(() => {
-    fetchEvents({})
-  }, [fetchEvents])
+    fetchEvents({
+      city,
+      category: category === 'all' ? undefined : category,
+      startDate,
+      endDate,
+    })
+  }, [fetchEvents, city, category, startDate, endDate])
 
   const handleOpenModal = (event) => {
     setSelectedEvent(event)
@@ -102,7 +122,7 @@ function App() {
   // passing `query` as the API keyword instead of filtering locally.
 
   const categories = uniqueOptions(allEvents, 'category')
-  const cities = uniqueOptions(allEvents, 'city')
+  const cities = uniqueOptions([...allEvents, ...CITY_OPTIONS.map((c) => ({ city: c }))], 'city')
   const resultsRef = useRef(null)
   // Banner: the team's own next upcoming event first; live events only if none of ours are upcoming.
   const nextEvent = getNextEvent(adminEvents) ?? getNextEvent(allEvents)
@@ -120,12 +140,10 @@ function App() {
     if (!matchesQuery(event, query)) return false
     if (category !== 'all' && norm(event.category) !== norm(category)) return false
     if (city && norm(event.city) !== norm(city)) return false
-    // Dates are YYYY-MM-DD strings, so they compare correctly as text (no time-zone shifts).
-    if (startDate || endDate) {
-      if (!event.date) return false
-      if (startDate && event.date < startDate) return false
-      if (endDate && event.date > endDate) return false
-    }
+    if ((startDate || endDate) && !event.date) return false
+    // Hide past events by default; an explicit start date overrides this.
+    if (event.date && event.date < (startDate || todayLocal())) return false
+    if (endDate && event.date > endDate) return false
     return true
   })
   // Sorting applies to all filtered events; with no sort chosen, admin events stay first.
