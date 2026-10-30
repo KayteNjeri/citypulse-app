@@ -1,4 +1,5 @@
 import os
+from html import escape
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -10,7 +11,7 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "CityPulse <noreply@CityPulse.com>")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
-IS_DEV = os.getenv("FLASK_ENV") != "production"
+IS_DEV = os.getenv("EMAIL_DRY_RUN", os.getenv("FLASK_DEBUG", "false")).lower() == "true"
 
 try:
     from ticketmaster import fetch_events, TicketmasterError
@@ -59,7 +60,7 @@ Upcoming on CityPulse:
 View all: {FRONTEND_URL}/events
 """     
 def _send_email(to_email, subject, html_body, text_body=None):
-    if IS_DEV and (not SMTP_USER or not SMTP_PASS):
+    if IS_DEV:
         print("\n" + "="*50)
         print(f"EMAIL TO: {to_email}")
         print(f"SUBJECT: {subject}")
@@ -190,3 +191,50 @@ Login here: {frontend_url}/login
     </div>
     """
     return _send_email(to_email, subject, html, text)
+
+def send_event_reminder(to_email, name, events):
+    """Send one daily digest for events saved by a user and happening tomorrow."""
+    subject = "Your CityPulse events are coming up tomorrow"
+    rows = []
+
+    for event in events:
+        title = escape(str(event.get("name") or "Your saved event"))
+        when = escape(" ".join(
+            str(part) for part in (event.get("date"), event.get("time")) if part
+        ))
+        where = escape(", ".join(
+            str(part) for part in (event.get("venue"), event.get("city")) if part
+        ))
+        rows.append(
+            f"<li><strong>{title}</strong> — {when}"
+            + (f" · {where}" if where else "")
+            + "</li>"
+        )
+
+    safe_name = escape(str(name or "there"))
+    safe_frontend_url = escape(FRONTEND_URL, quote=True)
+
+    html = (
+        f"<div><h2>Tomorrow on CityPulse, {safe_name}</h2>"
+        "<p>Here are the events you saved that are coming up tomorrow:</p>"
+        f"<ul>{''.join(rows)}</ul>"
+        f'<p><a href="{safe_frontend_url}/my-plans">View your plans</a></p>'
+        "<p>— The CityPulse Team</p></div>"
+    )
+
+    text_lines = [f"Hi {name or 'there'},", "", "Your saved events happening tomorrow:"]
+    for event in events:
+        when = " ".join(str(part) for part in (event.get("date"), event.get("time")) if part)
+        where = ", ".join(str(part) for part in (event.get("venue"), event.get("city")) if part)
+        text_lines.append(
+            f"- {event.get('name') or 'Your saved event'} — {when}"
+            + (f" · {where}" if where else "")
+        )
+
+    text_lines.extend([
+        "",
+        f"View your plans: {FRONTEND_URL}/my-plans",
+        "",
+        "— The CityPulse Team",
+    ])
+    return _send_email(to_email, subject, html, "\n".join(text_lines))

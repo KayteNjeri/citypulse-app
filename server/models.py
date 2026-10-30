@@ -90,6 +90,7 @@ class SavedEvent(db.Model):
     note = db.Column(db.Text)
     status = db.Column(db.String(20), nullable=False, default="interested")
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    reminder_sent_at = db.Column(db.DateTime(timezone=True), nullable=True)
 
     plan = db.relationship("Plan", back_populates="saved_events")
 
