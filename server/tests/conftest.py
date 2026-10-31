@@ -8,7 +8,7 @@ from extensions import db
 class TestConfig:
     
     TESTING = True
-    SECRET_KEY = "test-only-secret"
+    SECRET_KEY = "test-only-secret-key-at-least-32-bytes"
     SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL", "sqlite://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CORS_ORIGINS = ["http://localhost:5173"]

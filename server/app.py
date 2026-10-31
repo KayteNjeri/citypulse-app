@@ -27,7 +27,7 @@ def create_app(config_object=Config):
 
 
     # Import models so Flask-Migrate can discover metadata.
-    from models import User, Plan, SavedEvent  # noqa: F401
+    from models import User, Plan, SavedEvent, AuthRateLimit  # noqa: F401
 
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(plans_bp, url_prefix="/api/plans")
