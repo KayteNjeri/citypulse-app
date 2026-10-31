@@ -25,7 +25,7 @@ function NotificationSettings() {
                 </label>
                 </section>
                 <section className="notification-settings__input-group">
-                    <label htmlFor="reminder-time">Remind me before an event</label>
+                    <label htmlFor="reminder-time">Remind me before an event:   </label>
                     <select
                         id="reminder-time"
                         value={minutesBefore}
