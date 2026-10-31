@@ -8,7 +8,7 @@ CALLBACK = "/api/payments/mpesa/callback/testsecret"
 
 @pytest.fixture
 def auth(app):
-    app.config["JWT_SECRET_KEY"] = "test-secret"
+    app.config["JWT_SECRET_KEY"] = "citypulse-test-secret-key-at-least-32-bytes-long"
     app.config["MPESA_CALLBACK_SECRET"] = "testsecret"
     with app.app_context():
         return {

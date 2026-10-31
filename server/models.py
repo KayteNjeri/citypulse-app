@@ -90,6 +90,7 @@ class SavedEvent(db.Model):
     note = db.Column(db.Text)
     status = db.Column(db.String(20), nullable=False, default="interested")
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utc_now)
+    reminder_sent_at = db.Column(db.DateTime(timezone=True), nullable=True)
 
     plan = db.relationship("Plan", back_populates="saved_events")
 
@@ -204,3 +205,23 @@ class Payment(db.Model):
         }
 
 
+
+
+class AuthRateLimit(db.Model):
+    """Persistent, account-keyed authentication rate-limit counters."""
+
+    __tablename__ = "auth_rate_limits"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "scope",
+            "key_hash",
+            name="uq_auth_rate_limits_scope_key",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    scope = db.Column(db.String(40), nullable=False)
+    key_hash = db.Column(db.String(64), nullable=False)
+    window_started_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    attempts = db.Column(db.Integer, nullable=False, default=1)
+    updated_at = db.Column(db.DateTime(timezone=True), nullable=False)
